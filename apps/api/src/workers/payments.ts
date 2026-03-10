@@ -5,7 +5,7 @@ import {
   processPayoutWebhook,
   initiateDeposit,
 } from '../services/payment.js';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { payments } from '@hellodriver/db';
 
 export interface PaymentPollJob {
@@ -87,9 +87,8 @@ export function startPaymentWorker(app: FastifyInstance): Worker {
         app.log.debug({ jobData }, 'payment:initiate_deposit job started');
 
         // Look up user's phone number from database
-        const [user] = await app.db.execute(`SELECT phone FROM users WHERE id = $1`, [
-          jobData.user_id,
-        ]);
+        const users = await app.db.execute(sql`SELECT phone FROM users WHERE id = ${jobData.user_id}`);
+        const user = users.rows[0] as any;
 
         if (!user) {
           throw new UnrecoverableError(`User ${jobData.user_id} not found`);

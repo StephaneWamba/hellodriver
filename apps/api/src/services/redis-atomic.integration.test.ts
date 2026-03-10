@@ -154,8 +154,8 @@ describe('Redis Atomic Operations — Standalone Integration', () => {
     expect(pos).not.toBeNull();
     expect(pos!.length).toBe(1);
 
-    const retrievedLon = parseFloat(pos![0][0] as string);
-    const retrievedLat = parseFloat(pos![0][1] as string);
+    const retrievedLon = parseFloat((pos![0]?.[0] ?? '0') as string);
+    const retrievedLat = parseFloat((pos![0]?.[1] ?? '0') as string);
 
     expect(Math.abs(retrievedLon - lon)).toBeLessThan(0.0001);
     expect(Math.abs(retrievedLat - lat)).toBeLessThan(0.0001);
@@ -179,10 +179,10 @@ describe('Redis Atomic Operations — Standalone Integration', () => {
     await redis.geoadd(geoKey, 13.234, -0.628, 'point1');
     await redis.geoadd(geoKey, 13.244, -0.638, 'point2');
 
-    const distance = await redis.geodist(geoKey, 'point1', 'point2', 'm');
+    const distance = (await redis.geodist(geoKey, 'point1', 'point2', 'm' as any)) as string | null;
     expect(distance).not.toBeNull();
 
-    const distanceM = parseFloat(distance as string);
+    const distanceM = parseFloat(distance ?? '0');
     expect(distanceM).toBeGreaterThan(1000);
     expect(distanceM).toBeLessThan(2000);
 

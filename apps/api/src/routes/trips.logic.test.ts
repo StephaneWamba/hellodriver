@@ -254,7 +254,14 @@ describe('Trip Routes — Business Logic Correctness', () => {
      * cancelled_at: Set when status.includes('cancelled_')
      */
 
-    const trip = {
+    const trip: {
+      id: string;
+      created_at: Date;
+      started_at: Date | null;
+      completed_at: Date | null;
+      cancelled_at: Date | null;
+      status: string;
+    } = {
       id: 'trip123',
       created_at: new Date(),
       started_at: null,

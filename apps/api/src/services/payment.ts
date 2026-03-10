@@ -98,13 +98,12 @@ export async function initiateDeposit(
       id,
       user_id: userId,
       trip_id: tripId,
-      amount_xaf: amountXaf,
+      amount_xaf: amountXaf.toString(),
       payment_method: operator === 'AIRTEL_GABON' ? 'airtel_money' : 'moov_money',
       payment_type: 'deposit',
       status: 'initiated',
       idempotency_key: id,
       msisdn,
-      operator,
     })
     .returning();
 
@@ -201,9 +200,10 @@ export async function initiatePayout(
     .from(wallets)
     .where(eq(wallets.user_id, driverId));
 
-  if (!wallet || wallet.balance_xaf < amountXaf) {
+  const walletBalance = wallet ? parseFloat(wallet.balance_xaf as any) : 0;
+  if (!wallet || walletBalance < amountXaf) {
     throw AppError.insufficientBalance(
-      `Insufficient balance for payout. Available: ${wallet?.balance_xaf ?? 0} XAF`
+      `Insufficient balance for payout. Available: ${walletBalance} XAF`
     );
   }
 
@@ -231,13 +231,12 @@ export async function initiatePayout(
         .values({
           id,
           user_id: driverId,
-          amount_xaf: amountXaf,
+          amount_xaf: amountXaf.toString(),
           payment_method: operator === 'AIRTEL_GABON' ? 'airtel_money' : 'moov_money',
           payment_type: 'payout',
           status: 'processing',
           idempotency_key: id,
           msisdn,
-          operator,
         })
         .returning();
 
@@ -511,7 +510,7 @@ export async function processPayoutWebhook(
  */
 export async function processTripCompletion(
   app: FastifyInstance,
-  trip: typeof trips.$inferSelect
+  trip: any
 ): Promise<'paid' | 'payment_pending'> {
   if (trip.payment_method === 'cash') {
     // Cash payment: no wallet interaction
@@ -549,7 +548,7 @@ export async function processTripCompletion(
         id: crypto.randomUUID(),
         trip_id: trip.id,
         user_id: trip.client_id,
-        amount_xaf: trip.fare_xaf!,
+        amount_xaf: trip.fare_xaf!.toString(),
         payment_method: 'hello_monnaie',
         payment_type: 'deposit',
         status: 'confirmed',

@@ -138,8 +138,8 @@ describe.skipIf(!hasRequiredEnv)('Redis Matching Operations — Integration', ()
     expect(pos![0]).toBeDefined();
 
     // Position is [lon, lat] as strings
-    const retrievedLon = parseFloat(pos![0][0] as string);
-    const retrievedLat = parseFloat(pos![0][1] as string);
+    const retrievedLon = parseFloat((pos![0]?.[0] ?? '0') as string);
+    const retrievedLat = parseFloat((pos![0]?.[1] ?? '0') as string);
 
     // Should be very close (Redis precision)
     expect(Math.abs(retrievedLon - lon)).toBeLessThan(0.0001);
@@ -161,11 +161,11 @@ describe.skipIf(!hasRequiredEnv)('Redis Matching Operations — Integration', ()
     await redis.geoadd(geoKey, point2.lon, point2.lat, 'point2');
 
     // Distance in meters
-    const distance = await redis.geodist(geoKey, 'point1', 'point2', 'm');
+    const distance = (await redis.geodist(geoKey, 'point1', 'point2', 'm' as any)) as string | null;
     expect(distance).not.toBeNull();
 
     // Should be ~1500m (rough estimate)
-    const distanceM = parseFloat(distance as string);
+    const distanceM = parseFloat(distance ?? '0');
     expect(distanceM).toBeGreaterThan(1000);
     expect(distanceM).toBeLessThan(2000);
 
