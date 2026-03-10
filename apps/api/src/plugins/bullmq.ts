@@ -7,6 +7,7 @@ import { config } from '../config.js';
 //   - notifications: push, SMS, WhatsApp outbound
 //   - payments: pawaPay deposit/payout retry logic
 //   - payouts: scheduled driver payouts
+//   - trips: bid expiry (60s timeout)
 
 const CONNECTION = { url: config.REDIS_URL };
 
@@ -40,10 +41,21 @@ export const bullmqPlugin = fp(async (app: FastifyInstance) => {
     ...QUEUE_DEFAULTS,
   });
 
+  const tripsQueue = new Queue('trips', {
+    connection: CONNECTION,
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: { type: 'exponential' as const, delay: 1_000 },
+      removeOnComplete: { age: 86_400 }, // keep 24h for audit
+      removeOnFail: false,
+    },
+  });
+
   app.decorate('queues', {
     notifications: notificationsQueue,
     payments: paymentsQueue,
     payouts: payoutsQueue,
+    trips: tripsQueue,
   });
 
   app.addHook('onClose', async () => {
@@ -52,6 +64,7 @@ export const bullmqPlugin = fp(async (app: FastifyInstance) => {
       notificationsQueue.close(),
       paymentsQueue.close(),
       payoutsQueue.close(),
+      tripsQueue.close(),
     ]);
   });
 });

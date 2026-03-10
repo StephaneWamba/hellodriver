@@ -42,9 +42,28 @@ export const cancelTripSchema = z.object({
   reason: z.string().max(300).optional(),
 });
 
+export const estimateFareSchema = z.object({
+  origin: latLonSchema,
+  destination: latLonSchema,
+  vehicle_category: vehicleCategorySchema,
+});
+
+export const updateTripStatusSchema = z.object({
+  status: z.enum([
+    'driver_en_route',
+    'driver_arrived',
+    'in_progress',
+    'completed',
+    'cancelled_by_client',
+    'cancelled_by_driver',
+  ]),
+});
+
 export type CreateTripBody = z.infer<typeof createTripSchema>;
 export type TripBidBody = z.infer<typeof tripBidSchema>;
 export type RateTripBody = z.infer<typeof rateTripSchema>;
 export type CancelTripBody = z.infer<typeof cancelTripSchema>;
+export type EstimateFareBody = z.infer<typeof estimateFareSchema>;
+export type UpdateTripStatusBody = z.infer<typeof updateTripStatusSchema>;
 export type VehicleCategory = z.infer<typeof vehicleCategorySchema>;
 export type PaymentMethod = z.infer<typeof paymentMethodSchema>;

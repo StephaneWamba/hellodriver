@@ -7,7 +7,7 @@ import {
   numeric,
   integer,
 } from 'drizzle-orm/pg-core';
-import { tripStatusEnum, vehicleCategoryEnum } from './enums.js';
+import { tripStatusEnum, vehicleCategoryEnum, tripTypeEnum, paymentMethodEnum } from './enums.js';
 import { users } from './users.js';
 import { point } from './types.js';
 
@@ -42,6 +42,8 @@ export const trips = pgTable('trips', {
   origin_label: varchar('origin_label', { length: 200 }).notNull(),
   destination_label: varchar('destination_label', { length: 200 }).notNull(),
   vehicle_category: vehicleCategoryEnum('vehicle_category').notNull(),
+  trip_type: tripTypeEnum('trip_type').notNull().default('immediate'),
+  payment_method: paymentMethodEnum('payment_method').notNull().default('airtel_money'),
   distance_m: integer('distance_m'), // calculated on booking
   duration_s: integer('duration_s'),
   fare_xaf: integer('fare_xaf'), // gross fare including surge
@@ -54,6 +56,7 @@ export const trips = pgTable('trips', {
   completed_at: timestamp('completed_at', { withTimezone: true }),
   cancelled_at: timestamp('cancelled_at', { withTimezone: true }),
   cancellation_reason: text('cancellation_reason'),
+  cancellation_fee_xaf: integer('cancellation_fee_xaf').default(0),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

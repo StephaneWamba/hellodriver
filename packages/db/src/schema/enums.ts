@@ -30,6 +30,11 @@ export const vehicleCategoryEnum = pgEnum('vehicle_category', [
   'minivan',
 ]);
 
+export const tripTypeEnum = pgEnum('trip_type', [
+  'immediate',
+  'scheduled',
+]);
+
 export const paymentMethodEnum = pgEnum('payment_method', [
   'airtel_money',
   'moov_money',

@@ -100,6 +100,17 @@ export function errorHandler(
     });
   }
 
+  // PostgreSQL trigger exceptions (invalid state transitions)
+  const pgCode = (error as any).code;
+  if (pgCode === 'P0001' || pgCode === '23514') {
+    return reply.status(422).send({
+      error: {
+        code: ErrorCode.INVALID_TRIP_STATUS,
+        message: (error as any).message || 'Invalid state transition',
+      },
+    });
+  }
+
   // Fastify built-in errors (404, 405, etc.)
   if (error.statusCode != null && error.statusCode < 500) {
     return reply.status(error.statusCode).send({

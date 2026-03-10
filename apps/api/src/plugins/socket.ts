@@ -4,9 +4,9 @@ import { Server as SocketServer } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-streams-adapter';
 import msgpackParser from 'socket.io-msgpack-parser';
 import Redis from 'ioredis';
-import { driverLocations } from '@hellodriver/db';
+import { driverLocations, trips } from '@hellodriver/db';
 import { config } from '../config.js';
-import { sql } from 'drizzle-orm';
+import { sql, eq, and } from 'drizzle-orm';
 
 // ─── Socket.io server with Redis Streams adapter, msgpack parser, and zone rooms ──
 export const socketPlugin = fp(async (app: FastifyInstance) => {
@@ -54,6 +54,12 @@ export const socketPlugin = fp(async (app: FastifyInstance) => {
   io.on('connection', async (socket) => {
     const { userId, userRole } = socket.data;
 
+    // Personal rooms for all users
+    socket.join(`user:${userId}`);
+    if (userRole === 'driver') {
+      socket.join(`driver:${userId}`);
+    }
+
     // Only drivers use zones and GPS events
     if (userRole === 'driver') {
       try {
@@ -77,6 +83,66 @@ export const socketPlugin = fp(async (app: FastifyInstance) => {
       } catch (err) {
         app.log.error({ err, userId }, 'Error joining zone room');
       }
+
+      // ── Driver bid acceptance handler ──────────────────────────────────────
+      socket.on('driver:bid:accept', async ({ trip_id }, ack) => {
+        try {
+          // 1. Atomic claim via Redis SET NX (5 minutes TTL)
+          const claimed = await (app.redis.set as any)(
+            `trip:${trip_id}:claimed`,
+            userId,
+            'PX',
+            300000,
+            'NX',
+          );
+
+          if (claimed !== 'OK') {
+            socket.emit('trip:bid:rejected', {
+              trip_id,
+              reason: 'already_claimed',
+            });
+            ack?.({ ok: false, reason: 'already_claimed' });
+            return;
+          }
+
+          // 2. Update DB — only if still 'matching' (double-guard)
+          const [updated] = await app.db
+            .update(trips)
+            .set({
+              driver_id: userId,
+              status: 'driver_assigned' as any,
+              updated_at: new Date(),
+            })
+            .where(and(eq(trips.id, trip_id), eq(trips.status, 'matching' as any)))
+            .returning({ id: trips.id, client_id: trips.client_id });
+
+          if (!updated) {
+            await app.redis.del(`trip:${trip_id}:claimed`); // release lock
+            socket.emit('trip:bid:rejected', {
+              trip_id,
+              reason: 'trip_unavailable',
+            });
+            ack?.({ ok: false, reason: 'trip_unavailable' });
+            return;
+          }
+
+          // 3. Join trip room, store on socket
+          socket.join(`trip:${trip_id}`);
+          socket.data.activeTripId = trip_id;
+
+          // 4. Notify all parties
+          app.io.to(`trip:${trip_id}`).emit('trip:driver_assigned', {
+            trip_id,
+            driver_id: userId,
+          });
+
+          app.log.info({ userId, trip_id }, 'Driver accepted bid');
+          ack?.({ ok: true });
+        } catch (err) {
+          app.log.error({ err, userId, trip_id: trip_id }, 'Error in driver:bid:accept');
+          ack?.({ ok: false, reason: 'error' });
+        }
+      });
     }
 
     // ── GPS update event handler ───────────────────────────────────────────────
@@ -128,15 +194,17 @@ export const socketPlugin = fp(async (app: FastifyInstance) => {
           }
 
           // If driver is on an active trip, emit location to trip room
-          const tripRoomName = `trip:${userId}:active`; // or check trip_id from DB
-          socket.volatile.to(tripRoomName).emit('driver:location', {
-            driver_id: userId,
-            lat,
-            lon,
-            heading: payload.heading,
-            speed_kmh: payload.speed_kmh,
-            timestamp: new Date().toISOString(),
-          });
+          const activeTripId = socket.data.activeTripId;
+          if (activeTripId) {
+            socket.volatile.to(`trip:${activeTripId}`).emit('driver:location', {
+              driver_id: userId,
+              lat,
+              lon,
+              heading: payload.heading,
+              speed_kmh: payload.speed_kmh,
+              timestamp: new Date().toISOString(),
+            });
+          }
 
           // Acknowledge back to driver
           if (ack) {
