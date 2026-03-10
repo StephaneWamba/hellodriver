@@ -47,7 +47,6 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy
-        run: flyctl deploy --remote-only --app hellodriver-api
-        working-directory: apps/api
+        run: flyctl deploy --remote-only --app hellodriver-api --config apps/api/fly.toml
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
