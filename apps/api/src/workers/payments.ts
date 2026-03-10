@@ -7,6 +7,7 @@ import {
 } from '../services/payment.js';
 import { eq, sql } from 'drizzle-orm';
 import { payments } from '@hellodriver/db';
+import { config } from '../config.js';
 
 export interface PaymentPollJob {
   payment_id: string;
@@ -106,11 +107,7 @@ export function startPaymentWorker(app: FastifyInstance): Worker {
       }
     },
     {
-      connection: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379', 10),
-        db: parseInt(process.env.REDIS_DB || '0', 10),
-      },
+      connection: config.REDIS_URL,
       concurrency: 5, // Process up to 5 jobs in parallel
     }
   );
@@ -183,11 +180,7 @@ export function startPayoutWorker(app: FastifyInstance): Worker {
       }
     },
     {
-      connection: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379', 10),
-        db: parseInt(process.env.REDIS_DB || '0', 10),
-      },
+      connection: config.REDIS_URL,
       concurrency: 5,
     }
   );
