@@ -9,7 +9,8 @@ COPY packages/config/package.json packages/config/
 COPY packages/db/package.json packages/db/
 COPY packages/validators/package.json packages/validators/
 COPY apps/api/package.json apps/api/
-RUN pnpm install --frozen-lockfile --filter @hellodriver/api
+# Install all workspace packages to ensure node_modules exists for all
+RUN pnpm install --frozen-lockfile
 
 # ── build stage ───────────────────────────────────────────────────────────────
 FROM base AS build
