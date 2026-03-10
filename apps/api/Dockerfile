@@ -10,7 +10,7 @@ COPY packages/db/package.json packages/db/
 COPY packages/validators/package.json packages/validators/
 COPY apps/api/package.json apps/api/
 # Install all workspace packages to ensure node_modules exists for all
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # ── build stage ───────────────────────────────────────────────────────────────
 FROM base AS build
@@ -37,13 +37,8 @@ COPY --from=build --chown=hellodriver:hellodriver /app/node_modules ./node_modul
 COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/dist ./dist
 COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/package.json ./
 
-# Remove dev dependencies (ESLint, TypeScript, etc.) to reduce image size
-RUN rm -rf node_modules/@types \
-    && rm -rf node_modules/typescript* \
-    && rm -rf node_modules/eslint* \
-    && rm -rf node_modules/vitest* \
-    && rm -rf node_modules/@vitest* \
-    && true
+# Use pnpm to prune dev dependencies properly
+RUN pnpm prune --prod
 
 USER hellodriver
 EXPOSE 3000
