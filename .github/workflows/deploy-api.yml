@@ -33,6 +33,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build dependencies
+        run: |
+          pnpm --filter @hellodriver/config build
+          pnpm --filter @hellodriver/validators build
+          pnpm --filter @hellodriver/db build
+
       - name: Run tests
         run: pnpm --filter @hellodriver/api test
         env:
