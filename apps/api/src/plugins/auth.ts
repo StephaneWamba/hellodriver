@@ -55,6 +55,8 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
         request.userRole = user.role;
       } catch (err) {
         if (err instanceof AppError) throw err;
+        // Log the actual error for debugging
+        app.log.error({ err: err instanceof Error ? { message: err.message, stack: err.stack } : err }, 'JWT verification failed');
         throw AppError.unauthorized('Invalid or expired token');
       }
     },
