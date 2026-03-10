@@ -26,4 +26,4 @@ pnpm build
 
 Deploys to Cloudflare Pages on push to main.
 
-**Status**: Cloudflare API token updated ✅
+**Status**: Cloudflare API token verified and permissions added ✅
