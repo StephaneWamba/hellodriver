@@ -26,3 +26,5 @@ pnpm build
 ## Deployment
 
 Deploys to Cloudflare Pages on push to main.
+
+**Status**: Cloudflare Account ID configured ✅
