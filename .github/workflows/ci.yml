@@ -35,6 +35,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @hellodriver/validators build
+      - run: pnpm --filter @hellodriver/db build
       - run: pnpm --filter @hellodriver/api typecheck
 
   lint:
