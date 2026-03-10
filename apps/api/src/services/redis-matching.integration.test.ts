@@ -30,6 +30,7 @@ describe.skipIf(!hasRequiredEnv)('Redis Matching Operations — Integration', ()
   });
 
   afterAll(async () => {
+    if (!hasRequiredEnv || !redis) return;
     await redis.quit();
   });
 
