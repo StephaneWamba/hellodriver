@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { sendOtpSchema, verifyOtpSchema, registerUserSchema } from '@hellodriver/validators';
+import { sendOtpSchema, verifyOtpSchema, registerUserSchema, type SendOtpBody, type VerifyOtpBody, type RegisterUserBody } from '@hellodriver/validators';
 import { users, wallets } from '@hellodriver/db';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { createClient } from '@supabase/supabase-js';
 import { config } from '../config.js';
 import { AppError, ErrorCode } from '../errors.js';
@@ -21,7 +21,7 @@ export async function authRoutes(app: FastifyInstance) {
   // Sends OTP to a Gabon phone number.
   // Phase 5: WhatsApp-first waterfall added here.
   // Phase 0: Supabase SMS only.
-  app.post(
+  app.post<{ Body: SendOtpBody }>(
     '/auth/otp/send',
     { schema: { body: sendOtpSchema } },
     async (request, reply) => {
@@ -37,13 +37,18 @@ export async function authRoutes(app: FastifyInstance) {
         throw new AppError(ErrorCode.OTP_RATE_LIMITED, 'Too many OTP requests. Try again in 1 hour.', 429);
       }
 
-      const { error } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'phone_change',
-        phone,
+      // Call Supabase auth OTP endpoint directly
+      const response = await fetch(`${config.SUPABASE_URL}/auth/v1/otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: config.SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ phone }),
       });
 
-      if (error) {
-        app.log.error({ error, phone }, 'Failed to send OTP');
+      if (!response.ok) {
+        app.log.error({ status: response.status, phone }, 'Failed to send OTP');
         throw new AppError(ErrorCode.INTERNAL, 'Failed to send OTP', 500);
       }
 
@@ -53,7 +58,7 @@ export async function authRoutes(app: FastifyInstance) {
 
   // ── POST /auth/otp/verify ────────────────────────────────────────────────
   // Verifies OTP with Supabase. Returns session + creates user in our DB on first login.
-  app.post(
+  app.post<{ Body: VerifyOtpBody }>(
     '/auth/otp/verify',
     { schema: { body: verifyOtpSchema } },
     async (request, reply) => {
@@ -116,9 +121,8 @@ export async function authRoutes(app: FastifyInstance) {
     { preHandler: [app.authenticate] },
     async (request, reply) => {
       const user = await app.db.query.users.findFirst({
-        where: (u, { eq, isNull }) =>
-          // @ts-expect-error drizzle dynamic where
-          eq(u.id, request.userId) && isNull(u.deleted_at),
+        where: (u, { eq, isNull, and: andOp }) =>
+          andOp(eq(u.id, request.userId), isNull(u.deleted_at)),
         with: {
           wallet: { columns: { balance_xaf: true } },
         },
@@ -132,7 +136,7 @@ export async function authRoutes(app: FastifyInstance) {
 
   // ── POST /auth/register ──────────────────────────────────────────────────
   // Complete profile after first OTP login (full_name, etc.)
-  app.post(
+  app.post<{ Body: RegisterUserBody }>(
     '/auth/register',
     {
       preHandler: [app.authenticate],

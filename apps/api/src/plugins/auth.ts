@@ -39,9 +39,8 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
 
         // Look up our users table to get the application role
         const user = await app.db.query.users.findFirst({
-          where: (u, { eq, isNull }) =>
-            // @ts-expect-error — drizzle dynamic where
-            eq(u.auth_id, payload.sub) && isNull(u.deleted_at),
+          where: (u, { eq, isNull, and }) =>
+            and(eq(u.auth_id, payload.sub), isNull(u.deleted_at)),
           columns: { id: true, role: true },
         });
 

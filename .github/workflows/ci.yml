@@ -35,7 +35,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: echo "Typecheck skipped for Phase 0 - focus on CI/CD setup"
+      - run: pnpm --filter @hellodriver/api typecheck
 
   lint:
     name: Lint
