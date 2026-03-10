@@ -3,45 +3,7 @@ import { sql } from 'drizzle-orm';
 
 export async function healthRoutes(app: FastifyInstance) {
   // GET /health — used by Fly.io health checks + BetterStack uptime monitoring
-  app.get(
-    '/health',
-    {
-      schema: {
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              status: { type: 'string' },
-              version: { type: 'string' },
-              timestamp: { type: 'string' },
-              services: {
-                type: 'object',
-                properties: {
-                  database: { type: 'string' },
-                  redis: { type: 'string' },
-                },
-              },
-            },
-          },
-          503: {
-            type: 'object',
-            properties: {
-              status: { type: 'string' },
-              version: { type: 'string' },
-              timestamp: { type: 'string' },
-              services: {
-                type: 'object',
-                properties: {
-                  database: { type: 'string' },
-                  redis: { type: 'string' },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    async (request, reply) => {
+  app.get('/health', async (_request, reply) => {
       const checks = await Promise.allSettled([
         // DB: simple query
         app.db.execute(sql`SELECT 1`),
@@ -62,6 +24,5 @@ export async function healthRoutes(app: FastifyInstance) {
           redis: redisOk ? 'ok' : 'unreachable',
         },
       });
-    },
-  );
+  });
 }
