@@ -65,6 +65,16 @@ export class AppError extends Error {
   static badRequest(message = 'Bad request') {
     return new AppError(ErrorCode.BAD_REQUEST, message, 400);
   }
+
+  static paymentFailed(message: string) {
+    return new AppError(ErrorCode.PAYMENT_FAILED, message, 402);
+  }
+
+  static insufficientBalance(
+    message = 'Insufficient wallet balance',
+  ) {
+    return new AppError(ErrorCode.INSUFFICIENT_BALANCE, message, 402);
+  }
 }
 
 // ─── Global error handler ─────────────────────────────────────────────────────
@@ -100,9 +110,28 @@ export function errorHandler(
     });
   }
 
-  // PostgreSQL trigger exceptions (invalid state transitions)
+  // PostgreSQL exceptions
   const pgCode = (error as any).code;
-  if (pgCode === 'P0001' || pgCode === '23514') {
+  if (pgCode === 'P0001') {
+    // P0001: custom exception from post_wallet_transaction (overdraft or invalid type)
+    return reply.status(402).send({
+      error: {
+        code: ErrorCode.INSUFFICIENT_BALANCE,
+        message: (error as any).message || 'Insufficient wallet balance',
+      },
+    });
+  }
+  if (pgCode === 'P0002') {
+    // P0002: wallet not found
+    return reply.status(404).send({
+      error: {
+        code: ErrorCode.NOT_FOUND,
+        message: 'Wallet not found',
+      },
+    });
+  }
+  if (pgCode === '23514') {
+    // Invalid state transition
     return reply.status(422).send({
       error: {
         code: ErrorCode.INVALID_TRIP_STATUS,

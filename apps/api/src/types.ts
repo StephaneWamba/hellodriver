@@ -2,6 +2,7 @@ import type { DbClient } from '@hellodriver/db';
 import type { Redis } from 'ioredis';
 import type { Queue } from 'bullmq';
 import type { Server as SocketServer } from 'socket.io';
+import type { PawapayClient } from './services/pawapay.js';
 
 // ─── Fastify instance augmentation ────────────────────────────────────────────
 declare module 'fastify' {
@@ -9,6 +10,7 @@ declare module 'fastify' {
     db: DbClient;
     redis: Redis;
     io: SocketServer;
+    pawapay: PawapayClient | null;
     queues: {
       notifications: Queue;
       payments: Queue;

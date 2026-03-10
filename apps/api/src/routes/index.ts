@@ -5,6 +5,7 @@ import { driverRoutes } from './drivers.js';
 import { locationRoutes } from './locations.js';
 import { adminDriverRoutes } from './admin/drivers.js';
 import { tripRoutes } from './trips.js';
+import { paymentRoutes } from './payments.js';
 
 export async function registerRoutes(app: FastifyInstance) {
   await app.register(healthRoutes);
@@ -13,8 +14,8 @@ export async function registerRoutes(app: FastifyInstance) {
   await app.register(locationRoutes, { prefix: '/locations' });
   await app.register(adminDriverRoutes, { prefix: '/admin' });
   await app.register(tripRoutes, { prefix: '/trips' });
+  await app.register(paymentRoutes, { prefix: '/payments' });
 
-  // Phase 2+ routes registered here as they are built:
-  // await app.register(paymentRoutes, { prefix: '/payments' });
+  // Phase 5+ routes registered here as they are built:
   // await app.register(whatsappRoutes, { prefix: '/webhooks/whatsapp' });
 }

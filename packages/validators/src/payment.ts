@@ -4,11 +4,22 @@ import { gabonPhoneSchema, uuidSchema } from './common.js';
 export const pawapayOperatorSchema = z.enum(['AIRTEL_GABON', 'MOOV_GABON']);
 
 export const initiateDepositSchema = z.object({
-  trip_id: uuidSchema,
+  trip_id: uuidSchema.optional(),
   amount_xaf: z.number().int().positive(),
   msisdn: gabonPhoneSchema,
   operator: pawapayOperatorSchema,
 });
+
+export const initiatePayoutSchema = z.object({
+  amount_xaf: z.number().int().positive(),
+  msisdn: gabonPhoneSchema,
+  operator: pawapayOperatorSchema,
+});
+
+export const OPERATOR_LIMITS = {
+  AIRTEL_GABON: { max_per_tx: 500_000, max_daily: 1_000_000, max_tx_per_day: 30 },
+  MOOV_GABON: { max_per_tx: 300_000, max_daily: 1_000_000, max_tx_per_day: 25 },
+} as const;
 
 export const pawapayWebhookSchema = z.object({
   depositId: z.string(),
@@ -24,5 +35,6 @@ export const pawapayWebhookSchema = z.object({
 });
 
 export type InitiateDepositBody = z.infer<typeof initiateDepositSchema>;
+export type InitiatePayoutBody = z.infer<typeof initiatePayoutSchema>;
 export type PawapayWebhookPayload = z.infer<typeof pawapayWebhookSchema>;
 export type PawapayOperator = z.infer<typeof pawapayOperatorSchema>;

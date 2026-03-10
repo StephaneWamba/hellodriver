@@ -18,6 +18,7 @@
     "@fastify/cors": "^9.0.0",
     "@fastify/jwt": "^9.0.0",
     "@fastify/multipart": "^9.0.0",
+    "@fastify/rawbody": "^5.0.0",
     "@fastify/sensible": "^6.0.0",
     "@hellodriver/db": "workspace:*",
     "@hellodriver/validators": "workspace:*",

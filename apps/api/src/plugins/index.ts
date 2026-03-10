@@ -3,6 +3,7 @@ import { sentryPlugin } from './sentry.js';
 import { dbPlugin } from './db.js';
 import { redisPlugin } from './redis.js';
 import { bullmqPlugin } from './bullmq.js';
+import { pawapayPlugin } from './pawapay.js';
 import { authPlugin } from './auth.js';
 
 export async function registerPlugins(app: FastifyInstance) {
@@ -13,6 +14,7 @@ export async function registerPlugins(app: FastifyInstance) {
   await app.register(dbPlugin);
   await app.register(redisPlugin);
   await app.register(bullmqPlugin);
+  await app.register(pawapayPlugin);
 
   // Auth (depends on db for user lookup)
   await app.register(authPlugin);

@@ -33,6 +33,7 @@ import { trips, cancellationPolicies } from '@hellodriver/db';
 import { AppError, ErrorCode } from '../errors.js';
 import { estimateFare } from '../services/fare.js';
 import { getZoneSurge, findNearestDrivers } from '../services/matching.js';
+import { processTripCompletion } from '../services/payment.js';
 
 export async function tripRoutes(app: FastifyInstance) {
   // ─────────────────────────────────────────────────────────────────────────────
@@ -307,6 +308,29 @@ export async function tripRoutes(app: FastifyInstance) {
 
         if (!updated) {
           throw AppError.notFound('Trip not found');
+        }
+
+        // Process payment on trip completion (hello_monnaie: sync debit/credit, mobile money: async deposit job)
+        if (status === 'completed') {
+          try {
+            const newStatus = await processTripCompletion(app, updated);
+            if (newStatus !== 'paid') {
+              // Update trip status if payment processing changed it (e.g., 'payment_pending')
+              await app.db
+                .update(trips)
+                .set({ status: newStatus as any, updated_at: new Date() })
+                .where(eq(trips.id, tripId));
+            }
+          } catch (err) {
+            // Trip completion succeeds even if payment fails — driver completed the ride
+            app.log.error({ tripId, err }, 'processTripCompletion failed');
+            app.io
+              .to(`trip:${tripId}`)
+              .emit('payment:error', {
+                trip_id: tripId,
+                error: 'payment_processing_failed',
+              });
+          }
         }
 
         // Broadcast status update
