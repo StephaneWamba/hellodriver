@@ -12,5 +12,9 @@ export default defineConfig({
     },
     // Isolate each test file
     pool: 'forks',
+    // Skip integration tests in CI (they require Docker containers)
+    exclude: process.env.CI
+      ? ['src/**/*.integration.test.ts', 'node_modules']
+      : ['node_modules'],
   },
 });
