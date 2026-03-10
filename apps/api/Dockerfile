@@ -27,25 +27,36 @@ RUN pnpm --filter @hellodriver/validators build
 RUN pnpm --filter @hellodriver/db build
 RUN pnpm --filter @hellodriver/api build
 
-# ── prune production deps ──────────────────────────────────────────────────────
-FROM install AS prune
-WORKDIR /app
-RUN pnpm prune --prod --filter @hellodriver/api
-
-# ── production image ──────────────────────────────────────────────────────────
+# ── production image ──────────────────────────────────────────────────────
 FROM node:22-alpine AS runner
 WORKDIR /app
 
 # Non-root user for security
 RUN addgroup --system hellodriver && adduser --system --ingroup hellodriver hellodriver
 
-# Copy only production dependencies and compiled code
-COPY --from=prune --chown=hellodriver:hellodriver /app/node_modules ./node_modules
-COPY --from=prune --chown=hellodriver:hellodriver /app/apps/api/node_modules ./apps/api/node_modules
+# Copy production dependencies from build stage
+# These are already filtered during install, so we keep them as-is
+COPY --from=build --chown=hellodriver:hellodriver /app/node_modules ./node_modules
+COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/node_modules ./apps/api/node_modules
+
+# Copy compiled code
 COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/dist ./dist
 COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/package.json ./
+
+# Copy package distributions for internal deps
 COPY --from=build --chown=hellodriver:hellodriver /app/packages/db/dist ./node_modules/@hellodriver/db/dist
 COPY --from=build --chown=hellodriver:hellodriver /app/packages/validators/dist ./node_modules/@hellodriver/validators/dist
+
+# Remove dev dependencies (ESLint, TypeScript, etc.) to reduce image size
+RUN rm -rf node_modules/.bin \
+    && rm -rf node_modules/@types \
+    && rm -rf node_modules/typescript* \
+    && rm -rf node_modules/eslint* \
+    && rm -rf apps/api/node_modules/@types \
+    && rm -rf apps/api/node_modules/typescript* \
+    && rm -rf apps/api/node_modules/vitest* \
+    && rm -rf apps/api/node_modules/@vitest* \
+    && true
 
 USER hellodriver
 EXPOSE 3000
