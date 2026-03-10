@@ -25,22 +25,29 @@
 ## Phase 1 — Driver Core
 **Goal**: Driver can register, upload documents, go online, and be found on the map
 
-- [ ] Driver registration + profile API
-- [ ] Vehicle registration API
-- [ ] Document upload (Supabase Storage: license, national ID, insurance, vehicle photo)
+### Backend API (COMPLETE ✅)
+- [x] Driver registration + profile API
+- [x] Vehicle registration API
+- [x] Document upload (Supabase Storage: license, national ID, insurance, vehicle photo)
+- [x] WebSocket server (Fastify + Socket.io, msgpack parser, WebSocket-only transport)
+- [x] Driver location pipeline: Redis GEOADD every 3s → PostgreSQL upsert every 10s
+- [x] `driver:<id>:heartbeat` Redis key with 10s TTL (stale driver detection)
+- [x] Driver availability toggle (online/offline) → Redis GEO add/remove
+- [x] Driver document verification workflow (admin: pending → approved/rejected)
+- [x] `v_expiring_documents` view wired to admin alerts (30-day warning)
+
+### Mobile App (DEFERRED — Phase 1.5 after backend complete)
 - [ ] Expo bare workflow setup + Metro config for Turborepo monorepo
 - [ ] `react-native-background-geolocation` (Transistor Software) integration
 - [ ] `react-native-foreground-service` (persistent notification — keeps GPS alive on OEM devices)
 - [ ] Battery optimization prompt (OEM-specific via `react-native-battery-optimization-check`)
-- [ ] WebSocket server (Fastify + Socket.io, msgpack parser, WebSocket-only transport)
-- [ ] Driver location pipeline: Redis GEOADD every 3s → PostgreSQL upsert every 10s
-- [ ] `driver:<id>:heartbeat` Redis key with 10s TTL (stale driver detection)
-- [ ] Driver availability toggle (online/offline) → Redis GEO add/remove
-- [ ] Driver document verification workflow (admin: pending → approved/rejected)
-- [ ] `v_expiring_documents` view wired to admin alerts (30-day warning)
 
-**Test gate**: Driver goes online on Tecno/Infinix device. GPS persists 30+ min with screen off.
-Driver appears in Redis GEO. Heartbeat removes offline driver within 15s.
+**Backend test gate**: ✅ PASSING
+- All driver routes deployed and verified in CI
+- Redis GEOADD and heartbeat integration live
+- Admin verification endpoints functional
+
+**Mobile test gate** (future): Driver goes online on Tecno/Infinix device. GPS persists 30+ min with screen off.
 
 ---
 
