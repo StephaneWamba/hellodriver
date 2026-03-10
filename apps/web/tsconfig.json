@@ -1,0 +1,11 @@
+{
+  "extends": "@hellodriver/config/tsconfig/react",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@hellodriver/ui": ["../../packages/ui/src/index.ts"],
+      "@hellodriver/validators": ["../../packages/validators/src/index.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}

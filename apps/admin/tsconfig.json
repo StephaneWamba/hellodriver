@@ -1,0 +1,4 @@
+{
+  "extends": "@hellodriver/config/tsconfig/react",
+  "include": ["src", "vite.config.ts"]
+}

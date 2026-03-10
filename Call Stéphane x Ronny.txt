@@ -1,0 +1,207 @@
+# Call Stéphane x Ronny
+
+  Meeting started: 2/18/2026, 2:59:10 PM
+  Duration: 44 minutes
+  Participants: Ronny BIAM, stephane wamba
+
+  [View original transcript](https://app.tactiq.io/api/2/u/m/r/x1Z9LQC4gPw6dmlPxRQ5?o=txt)
+
+    ## Short summary
+
+# Résumé
+Ronny a présenté la maquette et le parcours utilisateur de l'application Hello Driver (client et chauffeur) et a expliqué qu'un chatbot WhatsApp servira de MVP avant le développement complet de l'application. Le flux comprend l'inscription, la sélection du type de course, le choix du véhicule, la proposition/prix, et plusieurs modes de paiement (carte, Mobile Money, dépôt mobile via la plateforme et un portefeuille interne « hello monnaie"). Les chauffeurs fournissent des documents (permis, pièce d'identité, assurance) vérifiés initialement par un service client humain ; la vérification automatisée a été discutée comme une option future. Les priorités sont l'intégration des moyens de paiement et la réalisation du prototype WhatsApp; Ronny propose un partenariat à long terme et la rédaction d'un pacte d'associés pour formaliser l'accord. Stéphane propose d'évaluer le découpage technique et reviendra avec une proposition pour la V1 et le prototype WhatsApp d'ici vendredi.
+
+  
+
+  
+    ## Highlights
+
+    > 21:08 Ronny BIAM: Ok donc là on revient à notre deuxième écran. On a coché ici que on est driver. Donc ça nous amène. ici Donc là c'est une inscription où on va d'abord donner les caractéristiques de soi-même, ensuite ceux de bon donc date de naissance lors du match du véhicule. Très important savoir si c'est climatisé ou non et le numéro de compte.
+> 21:45 Ronny BIAM: Donc là, on va fournir des photos de du permis de conduire de la pièce identité de l'assurance du véhicule très important pour le niveau légal.
+> 27:18 Ronny BIAM: Donc là, il y a son profil peut passer en mode sombre. Il peut voir ses gains notification historique des courses très important pour avoir une traçabilité.
+> 27:28 Ronny BIAM: Paramétrer son compte ou code de parrainage etc donc l'idée ici c'est que bon là c'est le profil rien de très intéressant peut-être voir son taux d'annulation. Bon les enchères ont porté comme je te je t'expliquer juste avant le système d'enchères. Sont ses avis clients etc. Ce qui est important ici c'est les gains qui va pouvoir tracer parce que je me suis rendu compte que et c'est les chauffeurs qui me l'ont dit, c'est pas évident de faire la gestion de son activité, donc là il va pouvoir savoir ce qu'il a fait comme chiffre chaque mois.
+> 32:10 stephane wamba: Oui, après on va développer parfois. Tu vois donc une fille de une V3 ainsi de suite en priorisant les fonctionnalités les plus importantes et ça c'est pour ça que je vais te demander quand ils sont les fonctionnalités qui sont les plus importantes pour toi aujourd'hui.
+
+  ## Transcript
+
+  00:00 Ronny BIAM: Hello
+00:01 stephane wamba: Oui comment tu vas.
+00:03 Ronny BIAM: Je vais bien et toi.
+00:04 stephane wamba: Ça va, ça va.
+00:06 Ronny BIAM: Tu m'entends bien. Ça me dit que on demande et un invité qui demande à accéder. oui, je te vois quand je vais activer mon C'est écrit Stéphane note.
+00:27 stephane wamba: qui prend les notes de la Réunion
+00:31 Ronny BIAM: de quoi Qui prend les notes par rapport à ok quoi, c'est une automatisation que tu as mise en place.
+00:41 stephane wamba: Oui, c'est ça.
+00:42 Ronny BIAM: OK
+00:44 stephane wamba: C'est pas moi conçu et c'est juste un service, il y a que je me suis dit.
+00:44 Ronny BIAM: après ah ok d'accord D'accord. Bon, je viens de finir un cours. Là, je me mets en place sur la petite ma caméra.
+00:57 stephane wamba: OK
+00:59 Ronny BIAM: Là, c'est ton bureau.
+01:02 stephane wamba: Non, c'est chez moi ça.
+01:04 Ronny BIAM: Bah, c'est sympa. C'est pas un fond vert non c'est réel. Enfin c'est pas.
+01:08 stephane wamba: c'est la tu parles de quelle forme
+01:15 Ronny BIAM: De derrière je vois des plantes en tableau. Ouais, c'est sympa. Bon, tu peux laisser ton temps travailler s'il te plaît. Bisous fais bisous.
+01:33 stephane wamba: T'inquiète pas.
+01:35 Ronny BIAM: Ma nièce, elle est partie. Alors, c'est un plaisir de se voir en vrai quand je veux juste. Sur lever parce que là c'est au salon et la caméra est un peu basse. Voilà. super alors C'est c'est vraiment intéressant parce que j'ai eu de nouvelles possibilités là récemment le nouveau projet qui me sont venus mais comme je veux pas. On va dire parasiter embrouillé, on va déjà commencer par avoir pour ce projet là mais c'est simplement pour te faire comprendre.
+02:21 Ronny BIAM: Peut-être il y aura d'autres projets qui qui vont suivre et qui sont tout aussi intéressants.
+02:26 stephane wamba: OK
+02:29 Ronny BIAM: Alors, je lance mon feat, ça met un peu de temps à ouvrir. En attendant que ça ouvre, je peux être refaire un petit.
+02:36 stephane wamba: pas de souci
+02:40 Ronny BIAM: Un petit refresh parce que ça fait quand même quelques jours qu'on avait parlé donc là, je vais te présenter les maquettes. Enfin la maquette de l'application permettra de mieux comprendre un peu la vision de De l'application et le driver c'est le nom que j'ai trouvé pour l'instant parce que c'est duplicable et parce que l'idée c'est de faire pas mal d'autres services avec hello. Je dis n'importe quoi et le work et le garage etc.
+03:14 Ronny BIAM: Mais comme je t'expliquais l'application peut-être c'est dans un second temps parce que ça va demander un coup matériel logistique et financier de développement et que du coup dans un premier temps pour tester le marché, je voulais déjà faire un WhatsApp. Et je pense qu'en Afrique généralement c'est WhatsApp l'outil le plus utilisé ce qui est sûr, c'est que toute ma clientèle cible à WhatsApp donc c'est en gros avantage.
+03:47 stephane wamba: tout à fait
+03:49 Ronny BIAM: Depuis la dernière fois est-ce qu'il y a des idées qui te sont venus. ou des questions
+03:53 stephane wamba: non
+03:56 Ronny BIAM: OK alors Sigma ouvre J'ai pas mal de feedback. Tu connais tu t'en sors bien sur figmat. Tu as déjà utilisé.
+04:14 stephane wamba: Je connais mais je ne suis pas souvent.
+04:18 Ronny BIAM: Moi, j'ai agréable moitié surpris par cet outil parce que de base je ne suis pas ux designer mais quand je bossais dans les agences à taille humaine, j'ai eu l'occasion, on m'a proposé est-ce que tu veux faire quelques maquettes j'ai dit ouais à l'opposé sur Adobe xD. Je mets pas du tout. J'ai dû en faire à l'école pour valider le module mais j'ai même pas du tout mais figma, j'ai vraiment beaucoup aimé et surtout que figma t'es pas obligé de commencer from scratch, tu peux regarder un modèle et après le personnaliser et avoir déjà des éléments et c'est vraiment cool, il y a toute une.
+04:55 Ronny BIAM: Il y a de la comment dire, il y a toute une communauté de ceux qui proposent pas mal de choses.
+05:01 stephane wamba: Il y a pas mal de tempêtes qui sont assez riches.
+05:04 Ronny BIAM: exact
+05:05 stephane wamba: Lorsqu'il faut vraiment personnaliser les solutions les customiser là, ça devient un peu compliqué.
+05:10 Ronny BIAM: Oui, mais moi si tu veux c'est le premier le premier pied à l'étrier là pour te lancer parce que pour moi commencer de d'un tableau blanc, c'est peut-être un peu plus dur que de commencer de quelque chose qui existe de l'améliorer de modifier ensuite plus à l'aise dans ce cas-là et c'est ce que j'ai fait donc c'est bon le fichier en train de s'ouvrir, j'ai mis des heures à travailler sur sur cette maquette.
+05:37 Ronny BIAM: Il y a des éléments à retravailler parce que depuis je me suis pas remis dessus depuis l'année dernière. Mais donc quand il y a des éléments qui seront.
+05:48 stephane wamba: L'année dernière 2025 c'est ça.
+05:50 Ronny BIAM: ouais donc, il y a des éléments aussi qui ont un peu bougé parce que quand je présentais depuis le téléphone sur sur comment s'appelle sur des Sur l'écran et tout quand je présentais ça aux étudiants sur le téléphone des fois involontaire. Moi je faisais bouger des éléments donc faudra que je me repose dessus. De toute façon, il y a quelques écrans que je dois faire évoluer. Je vais me reposer dessus pour bosser mais là globalement ça te donne déjà une bonne idée. Et sans plus tarder, je te partage l'écran, il est là. Donc c'est hello Driver 2 parce que du coup il y a une première version.
+06:34 Ronny BIAM: donc est-ce que tu vois bien mon écran Voilà bon normal, je m'excuse si j'étais un vrai u x designer j'aurais fait les écrans dans l'ordre et je pourrais t'appuyer sur présenter et tout devait passer les uns après les autres mais comme ce n'est pas le cas et que l'arbre de choix est quand même assez, il y a différents scénarii selon que tu sois driver ou client donc je vais te faire ça comme ça et je m'en excuse mais c'est le meilleur mois que j'ai pour l'instant.
+07:05 stephane wamba: pas de souci évidemment
+07:06 Ronny BIAM: Donc voici le premier écran sur lequel tu arrives ça te montre Hello driver ça te montre quelques avantages donc se déplacer autrement. Votre driver en 3 clics confort sans stress et choisir votre prix aucune surprise le prix est fixé avant chaque course, il met durée au départ de chaque course. Donc là, ça t'emmènera rapidement sur le deuxième écran qui te demande de préciser si tu es client ou driver.
+07:38 Ronny BIAM: Et tout de suite à te mettre driver et à les trois catégories taxi gamme donc ces trois catégories différentes de taxis qu'on a ici au Gabon.
+07:47 stephane wamba: OK
+07:48 Ronny BIAM: Donc voilà, on va prendre le chemin du client donc mettons que tu as cliqué ici sur client, ça t'emmène sur tac tac. Bon là, il y avait une flèche comme je te disais, j'ai bougé beaucoup de choses. La flèche, elle se déplacer un peu je peux la remettre tout de suite comme ça c'est fait. Voilà, elle était là pour mener. ici Voilà pardon donc cette flèche nous mène ici.
+08:24 Ronny BIAM: à l'écran de connexion C'est un peu galère de navigation donc ici c'est classique. On se connecte avec le téléphone Google ou Facebook. Donc voici le parcours pour le téléphone. Il y a le parcours Facebook et le parcours pour Google. Donc là rien de nouveau c'est le schéma classique. Ensuite quand une fois connecté ça t'emmène soit vers ici pour valider le numéro de téléphone soit si tu as pris Facebook ou Google, ça t'emmène directement sur lancer la course. Ça te demande le lieu de départ. Ah ça par exemple, c'est un bloc qui a bougé. Ce bloc là a bougé, il devait pas être là. Je vais le mettre ailleurs.
+09:18 Ronny BIAM: Bon au pire bon je le fais parce que j'ai commencé mais normalement je devais pas t'embrouiller avec ça. Voilà, je vais le mettre après plus tard. Donc là ça te demande uniquement ton lieu de départ. Ensuite la date à laquelle tu veux parce que ça peut être soit aujourd'hui soit programmer dans la semaine. Donc quelques informations sur toi en l'occurrence, tu me dis si jamais je vais trop vite ou s'il y a quelque chose pas clair.
+09:45 stephane wamba: Jusqu'ici ça va.
+09:46 Ronny BIAM: Ok super donc ton prénom le nombre de passagers la date de départ le l'heure de départ les détails par exemple préciser. Le je sais pas le motif de la course etc, c'est un champ facultatif de toute façon. Type de course et la catégorie de driver par rapport aux trois types de taxi dont je t'ai parlé un peu plus tôt. Donc ici le choix de la catégorie n'est pas obligatoire. Tu peux dire que peu importe l'un des trois je ne suis pas fermé le type de course ça va te
+10:26 stephane wamba: OK
+10:27 Ronny BIAM: proposer ici, c'est une boîte de dialogue qui va s'ouvrir qui va te dire la course partagée la course exclusive. Donc vous êtes le seul client un chauffeur privé, donc pendant l'axe de temps, il vous emmène où vous voulez ou l'abonnement mensuel pour les déplacements quotidiens par exemple aller au travail tous les jours. Donc ça une fois que c'est validé, tu enchaînes ici. Sur le trajet en lui-même les informations complémentaires et ça va te proposer des prix comme je sais pas si tu as déjà vu sur utiliser blablacar, ça va te proposer une fourchette haute une fourchette basse pour te dire les disponibilités, tu vas.
+11:13 Ronny BIAM: de surcroît valider dans ton prix la proposition de prix Si jamais tu as un code promo, tu peux le renseigner ici. Et là, il me semble tu vas valider aussi les moyens. Oui le code promo là, c'est dans ce cas ça t'emmène à là, c'est qui va nous intéresser ici c'est Oui, tu vas aussi pardon choisir le mode de paiement. Et tu peux cocher si tu veux obligatoirement qui est la clim sur ton véhicule.
+11:49 Ronny BIAM: Donc à ce moment-là, ça va proposer le ton trajet. Donc soit il y aura aucun driver dans la zone où tu es. On va t'inviter à élargir du coup le choix de driver ça ça peut être. On peut être lié au fait que tu as choisi exclusivement l'un des trois donc on va t'inviter plutôt à élargir sur d'autres ou sur les trois ou bien changer ton point de départ ou ton heure de départ.
+12:20 Ronny BIAM: Donc l'idée c'est de tout faire pour que tu trouves voilà, donc dans l'idéal maintenant, tu vas recevoir des des validations. Bon là, c'est quelque chose que je dois modifier parce que à la base j'avais pensé à ce que ce soit les conducteurs qui produisent qui proposent leurs prix. Comme un système de compte proposition tu proposes 3000 francs pour ce trajet là d'Orient qui a un conducteur te propose plutôt 4000 soit tu acceptes soit tu supprimes et tu vois les autres positions derrière mais je me suis rendu compte que pendant que le conducteur est en train de conduire, c'est pas évident que il puisse faire des propositions.
+13:04 Ronny BIAM: Donc peut-être que cet aspect compte proposition peut pour intervenir pour des trajets planifiés à l'avance. Mais dans les trajets immédiats, il y aura pas cette possibilité là, tu auras proposé 3000 francs en tant que client et il y aura juste la possibilité pour les conducteurs d'accepter ou de refuser. Jusque là, je t'ai pas perdu. Ok très bien donc voilà donc dans l'idéal tu as un client qui a un conducteur qui a accepté ta course à te faire récapitulatif ici.
+13:38 Ronny BIAM: Le montant que tu dois payer tu choisis ton mode de paiement ça peut être par carte ou par Mobile Money. Je sais plus où j'ai mis l'écran du choix du paiement. Je crois que ça doit être en bas ici. C'était ici. Voilà, c'était en bas de Donc le choix du mode de paiement je vais d'abord te prendre les classiques donc la carte bancaire. Ou le mobile donc a tellement des mouvements.
+14:15 Ronny BIAM: Il y a ce qu'on appelle le dépôt mobile. En fait, c'est l'équivalent de tu n'as pas d'argent, tu as de l'argent en espèces sur toi mais pas sur un compte. c'est quelque chose que j'ai vu avec les conducteurs qui m'ont fait comprendre que Comment ça s'appelle que très souvent ça arrivait que des gens n'avaient pas d'argent sur eux mais que pendant le trajet ils annonçaient au départ et ils s'arrêtaient à un point de retrait pour prendre de l'argent. Donc là l'idée, c'est de faire l'inverse, ils ont de l'argent liquide sur eux, vu qu'ils ont mis des pots mobile le conducteur, c'est que il va s'arrêter à un endroit pour que la personne fasse un dépôt.
+15:00 Ronny BIAM: Dépôt qui sera directement crédité sur le compte Mobile Money de notre application donc hello driver.
+15:09 stephane wamba: Et il va faire le dépôt directement au numéro de téléphone du conducteur.
+15:14 Ronny BIAM: Non pas du conducteur de Hello driver de notre plateforme.
+15:18 stephane wamba: Et la plateforme qui va automatiquement transiter la chambre vers son compte.
+15:22 Ronny BIAM: C'est ça exactement parce que déjà on veut éviter le liquide parce que le liquide ça cause beaucoup de problèmes de flou transparence traçabilité.
+15:32 stephane wamba: Puisque c'est nécessaire pour que la transaction soit logée dans le système sinon. pour avoir des
+15:39 Ronny BIAM: Aussi exact et le fait que le fait de le faire à notre application donc à notre numéro, c'est intéressant parce que par exemple même en termes d'expérience pour les conducteurs, c'est mieux parce que il reçoivent 10000 et qui doivent nous envoyer une partie. Ils ont c'est un peu plus déceptif que lorsque nous on reçoit les 10000 et qu'on leur envoie derrière 9500, il reçoit 9 et 500, ça fait plaisir. Ils ont pas l'impression d'avoir perdu une partie en fait.
+16:14 Ronny BIAM: Donc voilà pour qu'on le fait comme ça et il y a aussi le hello monnaie et ça je te détaillerai ça plus tard. Mais en gros c'est un portefeuille crédité uniquement sur l'application pour les trajets.
+16:28 stephane wamba: OK
+16:29 Ronny BIAM: Donc voilà bon là c'est dans le cas où le paiement échoué dans le cas où ça a réussi, on dit bon très bien grâce à votre commande, ça c'est un petit truc que j'ai voulu mettre que je trouve cool de dire que à chaque fois que vous faites une course en plante un arbre. C'est un peu le ce que ecosia fait et c'est aussi des choses qui peuvent nous permettre d'obtenir des subventions d'OMG etc mais bon avoir ça peut encore bouger.
+16:55 stephane wamba: OK
+16:56 Ronny BIAM: Donc, on a la course qui est en cas débuté, donc le chauffeur va déjà venir au point de prise. De du client la course à ce moment-là, il peut encore annuler mais ça c'est comme uber celui qui a l'origine de l'annulation que soit le client ou le chauffeur va subir une partie des frais de l'annulation. Donc, la course est terminée et aussi pour ça que ça intéressant que les chauffeurs aident l'argent en instant chez nous parce que du coup on peut directement retirer ça de leur virement mensuel pendant leur faire.
+17:37 Ronny BIAM: donc derrière on peut laisser un avis sur le conducteur et le conducteur possible et sans la vie sur le Sur le client en vous faire un code de réduction dire ça vous offre un sol de 4000 à utiliser pour votre prochaine course là, c'est vraiment dans l'optique de fidélisation de vous dire. Ah j'ai 4000 francs de crédité sur mon portefeuille pour la prochaine course donc je vais faire une prochaine course.
+18:04 Ronny BIAM: Voilà après là c'est du classique sur le compte. Vous pouvez modifier intégrer des modes de paiement sur le compte client. Donc voilà à peu près ce qui a été fait jusque là déjà qu'est-ce que tu en penses à Sony.
+18:19 stephane wamba: Évidemment, c'est bien passé lui il est bien fait et je trouve je ne sais pas pourquoi tu disais que au début.
+18:28 Ronny BIAM: Non, je disais qu'il y a encore des trucs à part faire il y a des idées qui me
+18:28 stephane wamba: Pour l'aspect visuel, ça me va c'est simpliste.
+18:31 Ronny BIAM: sont venues depuis que je n'ai pas encore actualisé, c'est juste ça. mais
+18:46 stephane wamba: mais comment est-ce que la plateforme se fait de l'argent
+18:57 Ronny BIAM: commission sur les courses C'est comme ce que je disais que si le client a payé 3500 par exemple pour la course, on va reverser peut-être 3000 au chauffeur et nous on va prendre 500 sur les les frais de service. Je sais pas encore déterminé le pourcentage, il y aura peut-être des pourcentages fixes ou variables en fonction de plusieurs choses mais c'est comme ça qu'on se qu'on se fait là.
+19:24 stephane wamba: est-ce que le Conducteur s'inscrit dans la plateforme paye quelque chose.
+19:30 Ronny BIAM: non
+19:31 stephane wamba: OK
+19:33 Ronny BIAM: pourquoi parce que c'est une non, moi je voulais éviter qu'il y ait des bloquant à l'entrée parce que l'idée c'est de C'est de faire en sorte d'avoir un maximum de chauffeur et ils vont pas forcément payer pour intégrer quelque chose qui ne savent pas ce qu'ils auront derrière mais par contre, ils vont payer après sur chaque course qu'on leur apporte il y a les frais mais c'est quelque chose qui est très bien accepté et normalisé par les conducteurs tous ceux que j'ai eu pour intégrer dans le groupe ça qui m'ont dit oui, c'est normal que vous preniez des frais sur la transaction.
+20:13 stephane wamba: Oui oui tout à fait tout à fait. Et c'est aussi au début le conducteur pour utiliser. La plateforme n'est pas
+20:16 Ronny BIAM: donc
+20:21 stephane wamba: payer quelque chose. au moins pour le début Ça peut être fait uniquement lorsque la plateforme a un homme conséquence d'utilisateur. donc voilà Niveau technique ça va il n'y a pas de souci.
+20:39 Ronny BIAM: Ça c'est quelque chose que tu es capable de développer assez simplement.
+20:44 stephane wamba: Il n'y aurait pas de difficulté et a priori.
+20:57 Ronny BIAM: Ok bon si à ce niveau tu as pas de question est-ce que tu veux que je te montre le parcours des des chauffeurs.
+21:07 stephane wamba: Oui, s'il te plaît.
+21:08 Ronny BIAM: Ok donc là on revient à notre deuxième écran. On a coché ici que on est driver. Donc ça nous amène. ici Donc là c'est une inscription où on va d'abord donner les caractéristiques de soi-même, ensuite ceux de bon donc date de naissance lors du match du véhicule. Très important savoir si c'est climatisé ou non et le numéro de compte.
+21:45 Ronny BIAM: Donc là, on va fournir des photos de du permis de conduire de la pièce identité de l'assurance du véhicule très important pour le niveau légal.
+21:58 stephane wamba: attends, s'il te plaît, est-ce que la vérification va se faire automatiquement à travers un service qui est agrégé à griller par
+22:06 Ronny BIAM: Non, je pensais faire ça par contre un service client.
+22:09 stephane wamba: OK
+22:11 Ronny BIAM: Parce que service tiers ça veut dire frais supplémentaire. Après c'est pas comme on dit. Nous notre obligation à mon sens, c'est la tester que le chauffeur nous a bien fourni son permis de conduire valide et ainsi que sa pièce identité l'assurance du véhicule. Maintenant, il peut arriver que je sais pas que ce soit un faux mais nous on ne pourra pas à tester de l'authenticité du permis de conduire. On pourra tester qui nous a fourni un document valide.
+22:48 Ronny BIAM: Donc, je pense que dans un premier temps c'est ça maintenant si on voit qu'il y a beaucoup, je pense que tu dis ça par rapport au fraude au document non valide.
+22:58 stephane wamba: non tout simplement pour la vérification parce que Vérifier qu'un opérateur humain vérifie manuellement les documents. C'est a priori plus fiable que c'est un système qui le fasse automatiquement.
+23:15 Ronny BIAM: OK À la limite est-ce qu'on peut faire un compromis entre les deux parce que c'est fiable mais c'est peut-être plus long parce que là je suis en train de penser si on a 20. 20 50 inscriptions par jour ça peut devenir intenable.
+23:32 stephane wamba: La langue à la langue il va falloir un service automatique et le début.
+23:35 Ronny BIAM: Ok est-ce qu'on peut pas déjà penser à un système automatisé préférification par exemple par un agentia et envoie en deuxième phase s'il y a un doute ou bien pour une un second regard humain.
+24:02 stephane wamba: Oui, ça fait ça mais ce n'est pas fiable.
+24:04 Ronny BIAM: OK Ok bon si c'est pas fiable autant laisser d'ici là qu'on va évoluer peut-être tu auras des solutions plus fiables qui vont apparaître.
+24:13 stephane wamba: Parce que parce que quoi en fait ce n'est pas que le document d'identité qu'on vérifie tu sais la vérification. Faciale tu prends ton téléphone, tu tournes en tête comme ça mais de suite c'est ce système là qui en tout cas, c'est ça qui fait la fiabilité. de la vérification
+24:35 Ronny BIAM: Ok mais ça ça on peut on pourra l'intégrer à la langue.
+24:41 stephane wamba: Oui à la langue.
+24:43 Ronny BIAM: ok parce que
+24:43 stephane wamba: Parce qu'il faut en fait le truc, c'est qu'il faut utiliser un service qui est agréé par l'État tu vois. C'est à dire que si toi tu l'imprimante et que ça fonctionne effectivement mais que ce n'est pas vérifié par un organisme. C'est pas un ministère un peu de l'État quoi.
+25:06 Ronny BIAM: Je pense pas qui disait ça ici donc dans un premier temps le faire de manière humaine et surtout garder la trace de tous les documents fournis par chaque l'idée, c'est que en cas de problème là par rapport à un chauffeur qui aurait fait je ne sais quoi. On puisse rapidement retrouver le dossier du chauffeur et voir voilà et puis pourquoi pas mettre aussi les rappels dans une
+25:26 stephane wamba: tout à fait
+25:30 Ronny BIAM: base de données en fait générer une base de données de chauffeur. Nous signaler que la pièce identité ou l'assurance de ce véhicule va expirer à telle date. Donc bien relancer le chauffeur pour qu'il nous envoie la nouvelle pièce etc.
+25:46 stephane wamba: exactement
+25:47 Ronny BIAM: super Donc ça une fois inscrit, on arrive au deuxième écran. Ou il peut direct directement nous faire part. Bon ça c'est un bouton qui sert à Activer et dire je suis disponible activer sa disponibilité pour recevoir des courses le désactiver pour les moments où il fait des courses autre où il est sur autre chose. Sinon, il peut aussi planifier il sait déjà quel jour dans la semaine il est dispo peut-être il veut travailler pour nous que le weekend etc. Là, c'est le tableau de bord où il va recevoir les différentes propositions.
+26:29 Ronny BIAM: Donc comme je te disais, ça c'est actualisé parce que à la base c'est comme ça que je voyais la réception des différentes commandes proposition client en gros la personne aurait le client aurait proposé son trajet et c'est le chauffeur qui viendrait dire bon pour ce trajet là moi c'est 2500 qui va m'intéresser et derrière le client reçoit la proposition du chauffeur de 2500 mais je me suis rendu compte que en conduisant, c'est trop compliqué de faire ça donc là à la place.
+27:05 Ronny BIAM: Il va juste recevoir les demandes de telles personnes proposent 2500 pour là-bas et il peut juste accepter ou refuser.
+27:16 stephane wamba: OK
+27:18 Ronny BIAM: Donc là, il y a son profil peut passer en mode sombre. Il peut voir ses gains notification historique des courses très important pour avoir une traçabilité.
+27:28 Ronny BIAM: Paramétrer son compte ou code de parrainage etc donc l'idée ici c'est que bon là c'est le profil rien de très intéressant peut-être voir son taux d'annulation. Bon les enchères ont porté comme je te je t'expliquer juste avant le système d'enchères. Sont ses avis clients etc. Ce qui est important ici c'est les gains qui va pouvoir tracer parce que je me suis rendu compte que et c'est les chauffeurs qui me l'ont dit, c'est pas évident de faire la gestion de son activité, donc là il va pouvoir savoir ce qu'il a fait comme chiffre chaque mois.
+28:07 Ronny BIAM: Il peut voir les jours où il a été le plus productif où les jours où il est le moins, il peut voir les dernières factures de ces dernières courses et il y a un truc plus loin même encore qui montre voilà. Les gains par commune donc les quartiers où ils sont le qui rapportent le plus donc peut-être il peut se dire stratégiquement je vais plutôt aller dans cette commune là parce que c'est celle là qui me rapporte le plus où j'ai les meilleurs courses et cetera donc c'est des informations dont il n'a pas forcément la visibilité lorsqu'il est au volant mais l'application lui permet aussi d'avoir cette information statistique là.
+28:52 stephane wamba: OK
+28:54 Ronny BIAM: Et normalement il y a un écran où on voit même bien, je les virer. je voulais faire un écran ouais, c'est celui-là que j'ai un peu short et l'idée c'était de vraiment pouvoir faire une plateforme de De gestion ne sont en dashboard. En fait un dashboard de son activité un peu détaillée etc mais bon, je pense que là on peut se pour une V1 on peut commencer par ça et puis peut-être si on voit que c'est quelque chose qui nous est demandé. On peut détailler.
+29:31 Ronny BIAM: Bon, ça c'est un autre écran que j'ai appris un exemple. Donc voilà un peu l'idée là, il reste juste l'écran Paramètres pour activité activer les notifications le montage position. Voilà, j'ai essayé de te faire ça vraiment en speed.
+29:50 stephane wamba: en tout cas la présentation avec les
+29:53 Ronny BIAM: Merci à toi.
+29:57 stephane wamba: maintenant, c'est quoi l'autre priorité c'est quoi tes dettes
+30:05 Ronny BIAM: grosse priorité C'est l'intégration des modes de paiement, je le sais là parce que petite parenthèse, j'ai développé une application de rencontre et pour l'instant, je peux pas la mettre sur le marché parce que j'ai pas encore trouvé la solution pour intégrer les le paiement mobile money. Je cherche un navigateur de paiement fiable qui va intégrer le Mobile Money et le paiement par carte et pour l'instant, j'ai pas encore trouvé mais bon à des charges ce qui me bloque le plus c'est que du côté légal création d'entreprise et tout ça là c'est pas encore fait si c'était fait j'aurais déjà pu j'aurais déjà pu passer par des j'aurais déjà pu le faire. C'est ce qui me manque à faire donc gros je vais pas dire warning mais gros Point bloquant à anticiper l'intégration du paiement Mobile Money qui est une clé de succès de de cette application de Hello driver.
+31:08 Ronny BIAM: Donc ça c'est pour l'application après comme j'ai vu que tu n'as pas spécialement été. Dérouté par le développement que par les écrans donc je pense que c'est dans tes cordes après tu me dis si je me trompe.
+31:27 stephane wamba: Préfet dit que je vais réfléchir quand on découpage en fait des l'implémentation des phases de l'implémentation du projet. Mais lui il est clair, ça facilite franchement le travail. Et cela dépend aussi de ma disponibilité relativement mes deux autres projets. Mon travail quoi tu vois. Ça c'est tout ça.
+31:55 Ronny BIAM: Ok de toute façon moi l'idée je suis conscient que développement de cette application prendra. Tu me dis si je me trompe mais je pense à minimum 9 mois si ça neuf mois.
+32:10 stephane wamba: Oui, après on va développer parfois. Tu vois donc une fille de une V3 ainsi de suite en priorisant les fonctionnalités les plus importantes et ça c'est pour ça que je vais te demander quand ils sont les fonctionnalités qui sont les plus importantes pour toi aujourd'hui.
+32:27 stephane wamba: Maintenant, tu peux prendre ton temps et pour avoir réponse et me revenir plus tard, il n'y a pas de souci.
+32:35 Ronny BIAM: Ok pas de souci.
+32:36 stephane wamba: voilà
+32:36 Ronny BIAM: C'est vrai que là effectivement ça a été exhaustif. Moi je vais plutôt voir ouais, je vais voir dans une logique de MVP. Quels sont les fonctionnalités à déployer dans un premier temps puis dans un second plan 3e etc. Donc voilà et pour répondre à ta question de base qui était. Oui, c'est plutôt le c'est vrai que c'est paradoxal parce que je te présente l'application mais c'est plutôt le chatbot WhatsApp qu'il faut développer dans un premier temps pour faire de prof concept.
+33:14 Ronny BIAM: Voir que ça marche bien et une fois que ça marche bien et que l'application est développée là maintenant, on invite de plus en plus les clients à aller sur l'application. On leur proposant des avantages etc.
+33:33 stephane wamba: OK
+33:35 Ronny BIAM: Bon maintenant que tu as vu le on va dire l'arbre de choix etc, est-ce que tu vois un peu mieux le process et ce qu'il faudrait pour le chatbot.
+33:48 stephane wamba: Il n'y a pas de souci.
+33:49 Ronny BIAM: Non, je parle de comment on appelle ça les différentes étapes en fait le
+33:55 stephane wamba: Quand tu parles de processus.
+34:02 Ronny BIAM: client qui donne sa position qui donne la sa destination.
+34:09 stephane wamba: Ou bien si tu veux et si tu as le temps, est-ce que tu peux faire une maquette uniquement pour WhatsApp. Comme ça ça éliminera les potentiels.
+34:21 Ronny BIAM: ouais Une maquette pour WhatsApp ça me prend beaucoup de temps et en termes du c'est pas forcément nécessaire vu que WhatsApp a déjà son truc figé. Par contre ce que je peux te faire c'est l'arbre de possibilités.
+34:40 stephane wamba: OK
+34:42 Ronny BIAM: L'étape par étape ce qu'il fait si ça te convient.
+34:43 stephane wamba: d'accord C'est à toi de me dire ça.
+34:48 Ronny BIAM: Super donc je vais te préparer ça et du coup j'en viens à la question phare est-ce que le projet t'intéresse si oui comment on peut commencer et comment on peut comment on peut s'associer dessus.
+35:13 stephane wamba: Après bon, tu m'apprends pas en tant que freelance ou employé, je suppose.
+35:20 Ronny BIAM: non
+35:20 stephane wamba: en tant que Je ne sais pas pourquoi.
+35:23 Ronny BIAM: moi Oui clairement en tant que cofondateur en tant que partenaire moi j'ai pas besoin de de c'est une application qui. Va évoluer donc j'ai besoin de quelqu'un qui s'inscrivent aussi dans le long terme.
+35:39 stephane wamba: OK
+35:40 Ronny BIAM: sur le c'est ça parce que il y a vraiment un je trouve que c'est un projet sympa qui peut être pionnier en tout cas ici au Gabon et de deux il y a beaucoup de il y a un vrai marché dessus parce que même il y a des trucs sympas qu'on pourra développer des trucs publicitaires des petits jeux de loterie sur l'application une fois qu'on a réussi à faire venir beaucoup de Beaucoup de trafic sur l'application derrière on va vraiment s'amuser et ça va être à mon sens assez lucratif parce que comme tu sais au Cameroun au Gabon, c'est pareil, il y a énormément de courses taxiques sont réalisées tous les jours, il y a de l'argent à se faire.
+36:25 stephane wamba: Ok et tu me confirmes que pour l'instant nous sommes uniquement deux sur le projet, c'est ça.
+36:30 Ronny BIAM: oui
+36:32 stephane wamba: OK
+36:33 Ronny BIAM: Après si tu as besoin de bras armé, c'est pas du tout un souci. Moi je peux te trouver des développeurs juniors avec qui je travaille majoritairement des étudiants qui vont pouvoir monter en compétences en travaillant avec toi. Donc toi, tu seras plutôt le leader et eux, ils seront. Derrière pour appliquer un peu les ça peut te permettre justement sur le côté temps lorsque tu n'as pas le temps, tu peux leur déléguer certaines tâches et vérifier après que ça a été bien fait.
+37:05 stephane wamba: d'accord ok Donc comme je t'ai dit là, je vais réfléchir au découpage des implantation et le temps priorité évidemment la question WhatsApp. Normalement, ça devrait pas prendre beaucoup de temps mais je vais te revenir d'ici. vendredi Parce qu'il faut que j'évalue toutes les contraintes qu'il peut avoir. pour arriver au succès de du prototype WhatsApp Merci s'il te plaît réalise la peau du choix là.
+37:47 Ronny BIAM: Je te fais ça, je te fais ça.
+37:50 stephane wamba: Maintenant, je suis un peu mitigé sur le processus de paiement depuis WhatsApp parce que c'est ça qui m'inquiétait. Je ne sais pas si WhatsApp peut autoriser ça. C'est d'avoir je vais voir ça et puis je vais te revenir parce que a priori c'est la seule chose qui pourrait déranger.
+38:08 Ronny BIAM: Après même dans le cas où WhatsApp mais c'est bien à regarder mais si WhatsApp neutrise pas cela on peut tu as vu il y avait trois il y avait plusieurs. Moyens de paiement on peut simplement on va dire. De manière simple expliquer aux clients et au chauffeur que un an se fait de telle manière, c'est à dire que lorsque la course est validée, on part sur le principe de confiance.
+38:42 Ronny BIAM: on peut avoir par contre je sais pas la pièce identité de de du client même si je pense qu'il y aura quand même des pertes mais bon bref l'idée c'est que le Client puisse payer par dépôt mobile ou bien par envoi direct de son de son portrait mobile vers notre numéro. On confirme au chauffeur que c'est fait et la course est validé.
+39:17 stephane wamba: Je sais pas si tu vois bien compris, tu peux reprendre.
+39:19 Ronny BIAM: Oui, pardon, je il y a ma nièce qui pleurait là donc ça va un peu embrouiller à partir du moment où le la course a été validé un chauffeur a accepté de prendre la course. On envoie le numéro de paiement Mobile Money au client. Qui valide le paiement donc pendant ce temps là, on suggère on suppose que le conducteur est en route pour le la récupération du client. Donc le paiement est validé, on confirme au chauffeur que c'est bien validé et il prend le client en charge.
+40:02 stephane wamba: Ok ok c'est ainsi que le paiement se fait alors en application mobile WhatsApp.
+40:09 Ronny BIAM: Application mobile simplement c'est quelque chose qui se fait ici pas mal de par exemple sur les lives Tik Tok et tout tu fais un paiement et ça marche le principe un peu de la confiance, tu fais un paiement tu fais une capture d'écran du paiement réalisé, tu nous envoies sur WhatsApp. Nous on vérifie en interne qu'on a bien reçu l'argent de cette personne et on envoie le statut valider au chauffeur pour te récupérer.
+40:34 stephane wamba: OK
+40:39 Ronny BIAM: Ça c'est en attendant d'avoir évidemment l'application.
+40:46 stephane wamba: D'accord, je prends ça en compte. Je vais te revenir d'ici vendredi ou plus tard avec la proposition finale de la première version.
+40:53 Ronny BIAM: OK très bien donc il y a pas de
+40:56 stephane wamba: Voilà, je ne sais pas. Est-ce que tu as déjà des trucs juridiques mis en place en sorte que si quelqu'un rejoint un projet c'est quelque chose un truc comme ça parce que évidemment c'est un passagers, je pense que ça a été assez confidentiel, je trouve.
+41:17 Ronny BIAM: Oui oui, je te prépare ça donc en parallèle pour vendredi ce qu'on fait c'est que moi je te prépare. En gros, c'est comment on appelle ça déjà un accord bon c'est des accords en gros consigne arrière et encore de nom des obligations. Le pacte le pack d'associé voilà c'est le terme que je cherchais que je vais rédiger limoger faire un peu droit mais je t'avoue que je vais m'aider de lire pour me faire un truc bien ficelé.
+41:49 Ronny BIAM: Ça ce sera bien bien bien équitable pour tout le monde et comme ça vendredi quand tu me reviens, je t'envoie ça et puis on peut on peut maintenant parler réfléchis des gens en amont de la part du pourcentage de notre partenariat que tu vas apprendre. globalement sur Ouais, je sais pas si ce qui est le mieux si c'est de voir globalement sur ce projet. Ouais, on va déjà faire sur ce projet parce que moi je pense que si tout se passe bien, il y a d'autres projets que j'ai en tête qui sont tout aussi porteurs qu'on pourra voir mais faisons déjà celui-là et puis on voit.
+42:26 stephane wamba: OK
+42:28 Ronny BIAM: Super bon, je te prends pas plus de temps.
+42:32 stephane wamba: Je t'en prie, je t'en prie franchement pour quelqu'un qui n'est pas pour moi, je n'arrive pas à faire ça, je n'ai jamais utilisé fine mon fils.
+42:42 Ronny BIAM: Différents à chacun moi par exemple j'ai développé des sites en aucun code
+42:46 stephane wamba: pas de façon sérieuse quoi
+42:55 Ronny BIAM: mais en code purge, j'essaie de m'accrocher pour apprendre python acheter. Mon cerveau décrocher c'était pas le truc qui m'intéressait. Donc voilà, c'est pour ça.
+43:11 stephane wamba: C'est difficile.
+43:17 Ronny BIAM: La maquette c'est le meilleur à mon sens, c'est le meilleur des cahiers des charges. Il y a plus qu'à réfléchir la chose, tu as appliqué et puis voilà. Ok donc c'est cool, je voulais te dire quoi. Peut-être que c'est trop tôt mais je me disais si tu peux déjà voir dans quelle mesure vu que c'est un spécialité s'offrira de ma part dans quelle mesure on peut intégrer l'IA pour encore améliorer l'efficacité de la chose.
+43:52 Ronny BIAM: Ok super donc je te prends pas plus de temps, on a réussi à faire ça en 50 minutes, c'est cool. On reste en contact.
+  

@@ -1,0 +1,37 @@
+app = "hellodriver-api"
+primary_region = "jnb"  # Johannesburg — closest to Libreville, Gabon
+
+[build]
+  dockerfile = "Dockerfile"
+  build_context = "../.."
+
+[env]
+  NODE_ENV = "production"
+  HOST = "0.0.0.0"
+  PORT = "3000"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false   # NEVER stop — cold starts break ride requests
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 500
+    soft_limit = 400
+
+[[vm]]
+  size = "shared-cpu-2x"   # 512MB RAM — enough for Node + Socket.io
+  memory = "512mb"
+
+[checks]
+  [checks.health]
+    grace_period = "10s"
+    interval = "15s"
+    method = "GET"
+    path = "/health"
+    port = 3000
+    timeout = "5s"
+    type = "http"
