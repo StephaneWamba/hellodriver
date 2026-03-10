@@ -1,11 +1,10 @@
 {
-  "extends": "@hellodriver/config/tsconfig/react",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@hellodriver/ui": ["../../packages/ui/src/index.ts"],
-      "@hellodriver/validators": ["../../packages/validators/src/index.ts"]
-    }
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
