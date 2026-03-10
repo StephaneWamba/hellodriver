@@ -15,8 +15,22 @@ import { processDepositWebhook, processPayoutWebhook } from '../services/payment
 import crypto from 'crypto';
 
 export async function paymentRoutes(app: FastifyInstance) {
-  // Register rawbody plugin for this plugin only (webhook HMAC verification)
-  await app.register(import('@fastify/rawbody'), { global: false });
+  // Store raw body for webhook HMAC verification
+  app.addContentTypeParser('application/json', (request, payload, done) => {
+    let body = '';
+    payload.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+    payload.on('end', () => {
+      (request as any).rawBody = body;
+      try {
+        done(null, JSON.parse(body));
+      } catch (err) {
+        done(err as Error);
+      }
+    });
+    payload.on('error', done);
+  });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // POST /deposits — Initiate wallet top-up or trip payment via mobile money
@@ -181,9 +195,7 @@ export async function paymentRoutes(app: FastifyInstance) {
   // ─────────────────────────────────────────────────────────────────────────────
   app.post(
     '/webhooks/pawapay',
-    {
-      config: { rawBody: true },
-    },
+    {},
     async (req, reply) => {
       // Get raw body for HMAC verification
       const rawBody = (req as any).rawBody as string;
