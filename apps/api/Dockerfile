@@ -25,9 +25,6 @@ RUN pnpm --filter @hellodriver/validators build
 RUN pnpm --filter @hellodriver/db build
 RUN pnpm --filter @hellodriver/api build
 
-# Prune dev dependencies before copying to runner
-RUN pnpm prune --prod
-
 # ── production image ──────────────────────────────────────────────────────
 FROM node:22-alpine AS runner
 WORKDIR /app
@@ -39,6 +36,8 @@ RUN addgroup --system hellodriver && adduser --system --ingroup hellodriver hell
 COPY --from=build --chown=hellodriver:hellodriver /app/node_modules ./node_modules
 COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/dist ./dist
 COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/package.json ./
+COPY --from=build --chown=hellodriver:hellodriver /app/pnpm-workspace.yaml ./
+COPY --from=build --chown=hellodriver:hellodriver /app/packages ./packages
 
 USER hellodriver
 EXPOSE 3000
