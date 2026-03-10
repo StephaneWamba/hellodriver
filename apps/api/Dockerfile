@@ -16,10 +16,6 @@ RUN pnpm install --frozen-lockfile
 FROM base AS build
 WORKDIR /app
 COPY --from=install /app/node_modules ./node_modules
-COPY --from=install /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=install /app/packages/config/node_modules ./packages/config/node_modules
-COPY --from=install /app/packages/db/node_modules ./packages/db/node_modules
-COPY --from=install /app/packages/validators/node_modules ./packages/validators/node_modules
 COPY package.json pnpm-workspace.yaml ./
 COPY packages ./packages
 COPY apps/api ./apps/api
@@ -35,28 +31,17 @@ WORKDIR /app
 # Non-root user for security
 RUN addgroup --system hellodriver && adduser --system --ingroup hellodriver hellodriver
 
-# Copy production dependencies from build stage
-# These are already filtered during install, so we keep them as-is
+# Copy production dependencies and compiled code from build stage
 COPY --from=build --chown=hellodriver:hellodriver /app/node_modules ./node_modules
-COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/node_modules ./apps/api/node_modules
-
-# Copy compiled code
 COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/dist ./dist
 COPY --from=build --chown=hellodriver:hellodriver /app/apps/api/package.json ./
 
-# Copy package distributions for internal deps
-COPY --from=build --chown=hellodriver:hellodriver /app/packages/db/dist ./node_modules/@hellodriver/db/dist
-COPY --from=build --chown=hellodriver:hellodriver /app/packages/validators/dist ./node_modules/@hellodriver/validators/dist
-
 # Remove dev dependencies (ESLint, TypeScript, etc.) to reduce image size
-RUN rm -rf node_modules/.bin \
-    && rm -rf node_modules/@types \
+RUN rm -rf node_modules/@types \
     && rm -rf node_modules/typescript* \
     && rm -rf node_modules/eslint* \
-    && rm -rf apps/api/node_modules/@types \
-    && rm -rf apps/api/node_modules/typescript* \
-    && rm -rf apps/api/node_modules/vitest* \
-    && rm -rf apps/api/node_modules/@vitest* \
+    && rm -rf node_modules/vitest* \
+    && rm -rf node_modules/@vitest* \
     && true
 
 USER hellodriver
