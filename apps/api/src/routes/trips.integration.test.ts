@@ -24,10 +24,10 @@ describe.skipIf(!hasRequiredEnv)('Trip Routes — Integration Tests', () => {
 
   beforeAll(async () => {
     // Import buildApp only when tests run (env vars are available)
-    if (hasRequiredEnv) {
-      const { buildApp } = await import('../app.js');
-      app = await buildApp();
-    }
+    if (!hasRequiredEnv) return;
+
+    const { buildApp } = await import('../app.js');
+    app = await buildApp();
 
     // Create test users (auth routes should exist from Phase 1)
     // Client
@@ -57,6 +57,7 @@ describe.skipIf(!hasRequiredEnv)('Trip Routes — Integration Tests', () => {
   });
 
   afterAll(async () => {
+    if (!hasRequiredEnv || !app) return;
     await app.close();
   });
 
