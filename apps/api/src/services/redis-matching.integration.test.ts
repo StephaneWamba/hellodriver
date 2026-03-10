@@ -1,17 +1,32 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import Redis from 'ioredis';
-import { config } from '../config.js';
 
 /**
  * Integration tests for Redis operations in matching
  * Tests: atomic claim (SET NX), heartbeat filtering, stale driver culling
+ * Skipped if environment variables are missing (no infrastructure available)
  */
 
-describe('Redis Matching Operations — Integration', () => {
-  let redis: Redis;
+const hasRequiredEnv = [
+  'DATABASE_URL',
+  'SUPABASE_URL',
+  'SUPABASE_ANON_KEY',
+  'SUPABASE_SERVICE_KEY',
+  'SUPABASE_JWT_SECRET',
+  'REDIS_URL',
+].every((key) => process.env[key]);
 
-  beforeAll(() => {
-    redis = new Redis(config.REDIS_URL);
+describe.skipIf(!hasRequiredEnv)('Redis Matching Operations — Integration', () => {
+  let redis: Redis;
+  let config: any;
+
+  beforeAll(async () => {
+    // Import config only when tests run (env vars are available)
+    if (hasRequiredEnv) {
+      const { config: loadedConfig } = await import('../config.js');
+      config = loadedConfig;
+      redis = new Redis(config.REDIS_URL);
+    }
   });
 
   afterAll(async () => {

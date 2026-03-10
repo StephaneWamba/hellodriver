@@ -1,20 +1,33 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { buildApp } from '../index.js';
 import type { FastifyInstance } from 'fastify';
 
 /**
  * Integration tests for Phase 2 Trip Matching
  * Tests real: PostgreSQL, PostGIS, Redis, BullMQ, state machine
+ * Skipped if environment variables are missing (no infrastructure available)
  */
 
-describe('Trip Routes — Integration Tests', () => {
+const hasRequiredEnv = [
+  'DATABASE_URL',
+  'SUPABASE_URL',
+  'SUPABASE_ANON_KEY',
+  'SUPABASE_SERVICE_KEY',
+  'SUPABASE_JWT_SECRET',
+  'REDIS_URL',
+].every((key) => process.env[key]);
+
+describe.skipIf(!hasRequiredEnv)('Trip Routes — Integration Tests', () => {
   let app: FastifyInstance;
   let clientToken: string;
   let driverToken: string;
   let adminToken: string;
 
   beforeAll(async () => {
-    app = await buildApp();
+    // Import buildApp only when tests run (env vars are available)
+    if (hasRequiredEnv) {
+      const { buildApp } = await import('../app.js');
+      app = await buildApp();
+    }
 
     // Create test users (auth routes should exist from Phase 1)
     // Client
