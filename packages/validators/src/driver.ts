@@ -27,7 +27,21 @@ export const availabilitySchema = z.object({
   is_available: z.boolean(),
 });
 
+export const documentUploadSchema = z.object({
+  document_type: z.enum([
+    'national_id',
+    'drivers_license',
+    'vehicle_registration',
+    'insurance',
+    'vehicle_photo',
+    'profile_photo',
+  ]),
+  storage_url: z.string().url(),
+  expiry_date: z.string().datetime().optional(),
+});
+
 export type RegisterDriverBody = z.infer<typeof registerDriverSchema>;
 export type RegisterVehicleBody = z.infer<typeof registerVehicleSchema>;
 export type DriverLocationPayload = z.infer<typeof driverLocationSchema>;
 export type AvailabilityPayload = z.infer<typeof availabilitySchema>;
+export type DocumentUploadBody = z.infer<typeof documentUploadSchema>;
