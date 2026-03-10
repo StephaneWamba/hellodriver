@@ -9,7 +9,7 @@ COPY packages/config/package.json packages/config/
 COPY packages/db/package.json packages/db/
 COPY packages/validators/package.json packages/validators/
 COPY apps/api/package.json apps/api/
-RUN pnpm install --frozen-lockfile --filter @hellodriver/api...
+RUN pnpm install --frozen-lockfile --filter @hellodriver/api
 
 # ── build stage ───────────────────────────────────────────────────────────────
 FROM base AS build
@@ -30,7 +30,7 @@ RUN pnpm --filter @hellodriver/api build
 # ── prune production deps ──────────────────────────────────────────────────────
 FROM install AS prune
 WORKDIR /app
-RUN pnpm prune --prod --filter @hellodriver/api...
+RUN pnpm prune --prod --filter @hellodriver/api
 
 # ── production image ──────────────────────────────────────────────────────────
 FROM node:22-alpine AS runner
