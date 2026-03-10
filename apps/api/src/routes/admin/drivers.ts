@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { eq, and } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import { driverProfiles, driverDocuments, adminActions } from '@hellodriver/db';
 import { AppError } from '../../errors.js';
 
@@ -143,6 +144,44 @@ export async function adminDriverRoutes(app: FastifyInstance) {
       });
 
       return reply.send({ driver: updated });
+    },
+  );
+
+  // ── GET /admin/drivers/documents/expiring ──────────────────────────────────
+  // List documents expiring within 30 days (from v_expiring_documents view)
+  app.get<{
+    Querystring: {
+      days_until?: string;
+    };
+  }>(
+    '/drivers/documents/expiring',
+    { preHandler: [app.authenticate, app.requireAdmin] },
+    async (request, reply) => {
+      const { days_until } = request.query;
+
+      let query = sql`SELECT * FROM v_expiring_documents`;
+
+      // Optional filter for documents expiring within N days
+      if (days_until) {
+        const dayLimit = parseInt(days_until, 10);
+        if (isNaN(dayLimit) || dayLimit < 0) {
+          throw AppError.badRequest('days_until must be a non-negative number');
+        }
+        query = sql`SELECT * FROM v_expiring_documents WHERE days_until_expiry <= ${dayLimit}`;
+      }
+
+      const result = await app.db.execute(query as any);
+      const expiringDocuments = (result as unknown as Array<{
+        id: string;
+        driver_id: string;
+        driver_name: string;
+        driver_phone: string;
+        document_type: string;
+        expiry_date: string;
+        days_until_expiry: number;
+      }>) ?? [];
+
+      return reply.send({ expiring_documents: expiringDocuments, total: expiringDocuments.length });
     },
   );
 }

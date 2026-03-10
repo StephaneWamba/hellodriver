@@ -61,6 +61,10 @@ export class AppError extends Error {
   static conflict(message: string) {
     return new AppError(ErrorCode.CONFLICT, message, 409);
   }
+
+  static badRequest(message = 'Bad request') {
+    return new AppError(ErrorCode.BAD_REQUEST, message, 400);
+  }
 }
 
 // ─── Global error handler ─────────────────────────────────────────────────────
