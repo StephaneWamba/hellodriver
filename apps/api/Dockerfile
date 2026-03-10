@@ -16,6 +16,7 @@ RUN pnpm install --frozen-lockfile
 FROM base AS build
 WORKDIR /app
 COPY --from=install /app/node_modules ./node_modules
+COPY tsconfig.json ./
 COPY package.json pnpm-workspace.yaml ./
 COPY packages ./packages
 COPY apps/api ./apps/api
