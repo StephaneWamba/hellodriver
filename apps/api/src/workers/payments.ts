@@ -7,7 +7,6 @@ import {
 } from '../services/payment.js';
 import { eq, sql } from 'drizzle-orm';
 import { payments } from '@hellodriver/db';
-import { config } from '../config.js';
 
 export interface PaymentPollJob {
   payment_id: string;
@@ -56,6 +55,15 @@ export function startPaymentWorker(app: FastifyInstance): Worker {
       if (job.name === 'payment:poll') {
         const jobData = job.data as PaymentPollJob;
         app.log.debug({ jobData }, 'payment:poll job started');
+
+        // Poll pawaPay for deposit status
+        const deposit = await app.db.query.payments.findFirst({
+          where: (payments, { eq }) => eq(payments.id, jobData.payment_id),
+        });
+
+        if (!deposit || !deposit.pawapay_deposit_id) {
+          throw new UnrecoverableError('Payment not found or no pawaPay deposit ID');
+        }
 
         // Check deposit status from pawaPay
         const status = await app.pawapay!.getDepositStatus(jobData.deposit_id);
@@ -107,7 +115,7 @@ export function startPaymentWorker(app: FastifyInstance): Worker {
       }
     },
     {
-      connection: config.REDIS_URL,
+      connection: app.redis as any, // Pass the Redis instance
       concurrency: 5, // Process up to 5 jobs in parallel
     }
   );
@@ -180,7 +188,7 @@ export function startPayoutWorker(app: FastifyInstance): Worker {
       }
     },
     {
-      connection: config.REDIS_URL,
+      connection: app.redis as any, // Pass the Redis instance
       concurrency: 5,
     }
   );
