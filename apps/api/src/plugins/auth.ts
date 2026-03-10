@@ -17,8 +17,11 @@ interface SupabaseJwtPayload {
 }
 
 export const authPlugin = fp(async (app: FastifyInstance) => {
+  // Supabase JWT secret is base64-encoded; decode it to binary
+  const secret = Buffer.from(config.SUPABASE_JWT_SECRET, 'base64');
+
   await app.register(jwt, {
-    secret: config.SUPABASE_JWT_SECRET,
+    secret,
     // Supabase uses HS256
     sign: { algorithm: 'HS256' },
     verify: { algorithms: ['HS256'] },
