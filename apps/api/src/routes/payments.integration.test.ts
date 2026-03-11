@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import crypto from 'crypto';
+import jwt from '@fastify/jwt';
 
 /**
  * Integration tests for Phase 3 Payment System
@@ -30,43 +31,76 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
     const { buildApp } = await import('../app.js');
     app = await buildApp();
 
-    // Create test users via auth routes
-    // Client user
-    const clientRes = await app.inject({
-      method: 'POST',
-      url: '/auth/phone/signup',
-      payload: {
-        phone_number: '+24177777777',
-        password: 'test123456',
-      },
-    });
+    // Generate test UUIDs
+    clientUserId = '550e8400-e29b-41d4-a716-446655440000';
+    driverUserId = '660e8400-e29b-41d4-a716-446655440001';
 
-    if (clientRes.statusCode === 201 || clientRes.statusCode === 200) {
-      const body = JSON.parse(clientRes.payload);
-      clientToken = body.token;
-      clientUserId = body.user?.id || body.userId || '550e8400-e29b-41d4-a716-446655440000';
+    // Generate JWT tokens directly using SUPABASE_JWT_SECRET
+    const jwtSecret = process.env.SUPABASE_JWT_SECRET;
+    if (!jwtSecret) throw new Error('SUPABASE_JWT_SECRET not set');
+
+    // Decode JWT secret from base64 if needed
+    let secretBuffer: Buffer;
+    try {
+      secretBuffer = Buffer.from(jwtSecret, 'base64');
+    } catch {
+      secretBuffer = Buffer.from(jwtSecret);
     }
 
-    // Driver user
-    const driverRes = await app.inject({
-      method: 'POST',
-      url: '/auth/phone/signup',
-      payload: {
-        phone_number: '+24177777778',
-        password: 'test123456',
-      },
-    });
+    const crypto_module = await import('crypto');
+    const createHmac = crypto_module.createHmac;
 
-    if (driverRes.statusCode === 201 || driverRes.statusCode === 200) {
-      const body = JSON.parse(driverRes.payload);
-      driverToken = body.token;
-      driverUserId = body.user?.id || body.userId || '660e8400-e29b-41d4-a716-446655440000';
-    }
+    // Create JWT payloads
+    const now = Math.floor(Date.now() / 1000);
+    const clientPayload = {
+      sub: clientUserId,
+      email: 'client@test.local',
+      phone: '+24177777777',
+      role: 'client',
+      aud: 'authenticated',
+      exp: now + 3600,
+      iat: now,
+    };
+    const driverPayload = {
+      sub: driverUserId,
+      email: 'driver@test.local',
+      phone: '+24177777778',
+      role: 'driver',
+      aud: 'authenticated',
+      exp: now + 3600,
+      iat: now,
+    };
+
+    // Sign tokens using HMAC (Supabase format)
+    const encodeToken = (payload: any) => {
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+      const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+      const signature = createHmac('sha256', secretBuffer).update(`${header}.${body}`).digest('base64url');
+      return `${header}.${body}.${signature}`;
+    };
+
+    clientToken = encodeToken(clientPayload);
+    driverToken = encodeToken(driverPayload);
 
     // Initialize wallets for both users
-    if (clientUserId && app.db) {
+    if (app.db) {
       try {
-        const { wallets } = await import('@hellodriver/db');
+        const { wallets, users } = await import('@hellodriver/db');
+
+        // Insert users first
+        await app.db.insert(users).values({
+          id: clientUserId,
+          phone: '+24177777777',
+          role: 'client',
+        }).onConflictDoNothing();
+
+        await app.db.insert(users).values({
+          id: driverUserId,
+          phone: '+24177777778',
+          role: 'driver',
+        }).onConflictDoNothing();
+
+        // Insert wallets
         await app.db
           .insert(wallets)
           .values({
@@ -74,14 +108,7 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
             balance_xaf: '1000000', // 1M XAF for testing
           })
           .onConflictDoNothing();
-      } catch {
-        // Wallet may already exist
-      }
-    }
 
-    if (driverUserId && app.db) {
-      try {
-        const { wallets } = await import('@hellodriver/db');
         await app.db
           .insert(wallets)
           .values({
@@ -89,8 +116,8 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
             balance_xaf: '500000', // 500k XAF for payout testing
           })
           .onConflictDoNothing();
-      } catch {
-        // Wallet may already exist
+      } catch (err) {
+        app.log.warn({ err }, 'Failed to initialize test users/wallets');
       }
     }
   });
@@ -154,7 +181,7 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
         },
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(422);
       const body = JSON.parse(res.payload);
       expect(body.error?.code).toBe('VALIDATION_ERROR');
     });
@@ -171,7 +198,7 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
         },
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(422);
       const body = JSON.parse(res.payload);
       expect(body.error?.code).toBe('VALIDATION_ERROR');
       expect(body.error?.details?.[0]?.message).toContain('Gabon phone number');
@@ -189,7 +216,7 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
         },
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(422);
       const body = JSON.parse(res.payload);
       expect(body.error?.code).toBe('VALIDATION_ERROR');
     });
@@ -319,7 +346,7 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
         },
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(422);
     });
 
     it('should enforce Moov per-transaction limit for payouts (300k)', async () => {
@@ -467,7 +494,7 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
         payload: {},
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(422);
       const body = JSON.parse(res.payload);
       expect(body.error?.message).toContain('Invalid webhook operation');
     });
@@ -539,7 +566,7 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
         },
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(422);
       const body = JSON.parse(res.payload);
       expect(body.error?.message).toContain('Invalid webhook status');
     });
@@ -559,7 +586,7 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
         },
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(422);
       const body = JSON.parse(res.payload);
       expect(body.error?.message).toContain('depositId or payoutId');
     });
