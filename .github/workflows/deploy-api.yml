@@ -87,6 +87,7 @@ jobs:
       - name: Run integration tests against production
         run: cd apps/api && npm test -- --run payments.integration.test.ts
         env:
+          CI: 'false'  # Allow integration tests to run
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
