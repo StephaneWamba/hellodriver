@@ -12,6 +12,11 @@ import { payments, walletTransactions, wallets } from '@hellodriver/db';
 import { AppError } from '../errors.js';
 import { initiateDeposit, initiatePayout } from '../services/payment.js';
 import { processDepositWebhook, processPayoutWebhook } from '../services/payment.js';
+import {
+  verifyPawapaySignature,
+  verifyContentDigest,
+  fetchPawapayPublicKey,
+} from '../services/pawapay.js';
 import crypto from 'crypto';
 
 export async function paymentRoutes(app: FastifyInstance) {
@@ -191,13 +196,22 @@ export async function paymentRoutes(app: FastifyInstance) {
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // POST /webhooks/pawapay — Receive and process pawaPay webhooks
+  // POST /webhooks/pawapay/{deposits,payouts,refunds} — RFC 9421 signature verification
   // ─────────────────────────────────────────────────────────────────────────────
   app.post(
-    '/webhooks/pawapay',
+    '/webhooks/pawapay/:operation',
     {},
     async (req, reply) => {
-      // Get raw body for HMAC verification
+      const { operation } = req.params as { operation: string };
+
+      // Validate operation
+      if (!['deposits', 'payouts', 'refunds'].includes(operation)) {
+        return reply.status(400).send({
+          error: { code: 'BAD_REQUEST', message: 'Invalid webhook operation' },
+        });
+      }
+
+      // Get raw body for signature verification
       const rawBody = (req as any).rawBody as string;
       if (!rawBody) {
         return reply.status(400).send({
@@ -205,38 +219,91 @@ export async function paymentRoutes(app: FastifyInstance) {
         });
       }
 
-      // Verify HMAC signature
-      const signature = req.headers['x-pawapay-signature'] as string | undefined;
-      if (!signature) {
+      // Extract RFC 9421 signature headers
+      const signatureHeader = req.headers['signature'] as string | undefined;
+      const signatureInputHeader = req.headers['signature-input'] as string | undefined;
+      const contentDigestHeader = req.headers['content-digest'] as string | undefined;
+      const signatureDateHeader = req.headers['signature-date'] as string | undefined;
+
+      if (!signatureHeader || !signatureInputHeader || !contentDigestHeader) {
         return reply.status(401).send({
-          error: { code: 'UNAUTHORIZED', message: 'Missing signature header' },
+          error: { code: 'UNAUTHORIZED', message: 'Missing signature headers' },
         });
       }
 
-      const [, sigValue] = signature.split('=');
+      // Verify Content-Digest (SHA-512 hash of body)
+      if (!verifyContentDigest(contentDigestHeader, rawBody, app.log)) {
+        app.log.warn({ contentDigestHeader }, 'Content-Digest verification failed');
+        return reply.status(401).send({
+          error: { code: 'UNAUTHORIZED', message: 'Invalid Content-Digest' },
+        });
+      }
+
+      // Parse Signature-Input to extract keyid and algorithm
+      const signatureInputMatch = signatureInputHeader.match(/keyid="([^"]+)"/);
+      const algMatch = signatureInputHeader.match(/alg="([^"]+)"/);
+
+      if (!signatureInputMatch || !algMatch) {
+        return reply.status(401).send({
+          error: { code: 'UNAUTHORIZED', message: 'Invalid Signature-Input format' },
+        });
+      }
+
+      const keyId = signatureInputMatch[1];
+      const algorithm = algMatch[1];
+
+      // Fetch PawaPay's public key
+      if (!app.pawapay) {
+        return reply.status(503).send({
+          error: { code: 'SERVICE_UNAVAILABLE', message: 'Payment service is not configured' },
+        });
+      }
+
+      let publicKeyPem: string;
+      try {
+        publicKeyPem = await fetchPawapayPublicKey(app.pawapay, keyId, app.log);
+      } catch (err) {
+        app.log.error({ keyId, err }, 'Failed to fetch PawaPay public key');
+        return reply.status(401).send({
+          error: { code: 'UNAUTHORIZED', message: 'Failed to verify signature' },
+        });
+      }
+
+      // Verify RFC 9421 signature
+      const method = req.method;
+      const authority = req.headers.host || 'hellodriver-api.fly.dev';
+      const path = `/webhooks/pawapay/${operation}`;
+
+      // Extract signature value from Signature header (format: sig-pp=:base64url:)
+      const sigValueMatch = signatureHeader.match(/sig-pp=:([^:]+):/);
+      const sigValue = sigValueMatch?.[1];
+
       if (!sigValue) {
         return reply.status(401).send({
-          error: { code: 'UNAUTHORIZED', message: 'Invalid signature format' },
+          error: { code: 'UNAUTHORIZED', message: 'Invalid Signature header format' },
         });
       }
 
-      const expected = crypto
-        .createHmac('sha256', process.env.PAWAPAY_WEBHOOK_SECRET || '')
-        .update(rawBody)
-        .digest('hex');
+      const headersMap: Record<string, string | undefined> = {
+        'signature-date': signatureDateHeader,
+        'content-digest': contentDigestHeader,
+        'content-type': req.headers['content-type'] as string | undefined,
+      };
 
-      // Constant-time comparison to prevent timing attacks
-      let isValid = false;
-      try {
-        isValid = crypto.timingSafeEqual(
-          Buffer.from(expected, 'hex'),
-          Buffer.from(sigValue, 'hex')
-        );
-      } catch {
-        isValid = false;
-      }
+      const isSignatureValid = verifyPawapaySignature(
+        method,
+        authority,
+        path,
+        rawBody,
+        headersMap,
+        sigValue,
+        signatureInputHeader,
+        publicKeyPem,
+        app.log
+      );
 
-      if (!isValid) {
+      if (!isSignatureValid) {
+        app.log.warn({ keyId, algorithm }, 'Signature verification failed');
         return reply.status(401).send({
           error: { code: 'UNAUTHORIZED', message: 'Invalid signature' },
         });
@@ -263,7 +330,7 @@ export async function paymentRoutes(app: FastifyInstance) {
         });
       }
 
-      // Redis deduplication: ensure we process each webhook only once
+      // Redis deduplication
       const webhookId = depositId || payoutId;
       if (!webhookId) {
         return reply.status(400).send({
@@ -280,7 +347,6 @@ export async function paymentRoutes(app: FastifyInstance) {
       );
 
       if (!seen) {
-        // Webhook already processed
         app.log.debug({ webhookId }, 'Duplicate webhook, skipping');
         return reply.status(200).send({ status: 'acknowledged' });
       }
@@ -310,10 +376,8 @@ export async function paymentRoutes(app: FastifyInstance) {
         }
       } catch (err) {
         app.log.error({ webhookId, err }, 'Failed to enqueue webhook job');
-        // Still return 200 to acknowledge receipt to pawaPay
       }
 
-      // Always return 200 immediately to pawaPay
       return reply.status(200).send({ status: 'acknowledged' });
     }
   );

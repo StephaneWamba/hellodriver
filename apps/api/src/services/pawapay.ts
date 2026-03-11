@@ -1,4 +1,5 @@
 import { AppError, ErrorCode } from '../errors.js';
+import crypto from 'crypto';
 
 export type PawapayOperator = 'AIRTEL_GABON' | 'MOOV_GABON';
 
@@ -148,6 +149,125 @@ export function createPawapayClient(
   logger?: { debug: (msg: string, data?: unknown) => void; error: (msg: string, err?: unknown) => void }
 ): PawapayClient {
   return new PawapayClient(apiKey, baseUrl, logger);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// RFC 9421 Webhook Signature Verification
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface PawapayPublicKey {
+  id: string;
+  key: string;
+}
+
+/**
+ * Fetch PawaPay's public key for webhook signature verification
+ * Uses the Public Keys endpoint to retrieve the signing key by ID
+ */
+export async function fetchPawapayPublicKey(
+  client: PawapayClient,
+  keyId: string,
+  logger?: { debug: (msg: string, data?: unknown) => void }
+): Promise<string> {
+  // Access the private request method through any type
+  const privateClient = client as any;
+  const response = await privateClient.request('GET', `/v1/public-keys/${keyId}`);
+  logger?.debug('fetched_pawapay_public_key', { keyId });
+  return response.key;
+}
+
+/**
+ * Verify RFC 9421 signature from PawaPay webhook
+ * Constructs the signature base string and verifies using ECDSA-P256-SHA256
+ */
+export function verifyPawapaySignature(
+  method: string,
+  authority: string,
+  path: string,
+  rawBody: string,
+  headers: Record<string, string | undefined>,
+  signatureValue: string,
+  signatureInputHeader: string,
+  publicKeyPem: string,
+  logger?: { debug: (msg: string, data?: unknown) => void; error: (msg: string, err?: unknown) => void }
+): boolean {
+  try {
+    // Extract signature components from Signature-Input
+    // Format: sig-pp=("@method" "@authority" "@path" ...);alg="...";keyid="...";...
+    const componentsList = signatureInputHeader.match(/sig-pp=\("([^"]+)"\)/)?.[1] || '';
+    const components = componentsList.split('" "').map((c) => c.replace(/"/g, ''));
+
+    // Build signature base string per RFC 9421
+    let signatureBase = '';
+    for (const component of components) {
+      if (component === '@method') {
+        signatureBase += `"@method": ${method}\n`;
+      } else if (component === '@authority') {
+        signatureBase += `"@authority": ${authority}\n`;
+      } else if (component === '@path') {
+        signatureBase += `"@path": ${path}\n`;
+      } else if (component === 'signature-date') {
+        signatureBase += `"signature-date": ${headers['signature-date']}\n`;
+      } else if (component === 'content-digest') {
+        signatureBase += `"content-digest": ${headers['content-digest']}\n`;
+      } else if (component === 'content-type') {
+        signatureBase += `"content-type": ${headers['content-type']}\n`;
+      }
+    }
+
+    // Remove trailing newline and add signature params
+    signatureBase = signatureBase.slice(0, -1) + '\n';
+    signatureBase += `"@signature-params": ${signatureInputHeader}`;
+
+    logger?.debug('verifying_pawapay_signature', { signatureBase: signatureBase.slice(0, 100) });
+
+    // Extract signature value (remove base64url colons)
+    const sigBytes = Buffer.from(signatureValue.replace(/:/g, ''), 'base64');
+
+    // Verify ECDSA-P256-SHA256 signature
+    const verifier = crypto.createVerify('SHA256');
+    verifier.update(signatureBase);
+
+    const isValid = verifier.verify(publicKeyPem, sigBytes);
+    logger?.debug('pawapay_signature_verification_result', { isValid });
+    return isValid;
+  } catch (err) {
+    logger?.error('pawapay_signature_verification_error', err);
+    return false;
+  }
+}
+
+/**
+ * Verify Content-Digest header matches the SHA-512 hash of the body
+ */
+export function verifyContentDigest(
+  digestHeader: string,
+  rawBody: string,
+  logger?: { debug: (msg: string, data?: unknown) => void; error: (msg: string, err?: unknown) => void }
+): boolean {
+  try {
+    // Format: sha-512=:base64url_value:
+    const [algo, value] = digestHeader.split('=');
+    if (!algo || !value) {
+      return false;
+    }
+
+    const expectedHash = crypto
+      .createHash(algo.toLowerCase().replace('-', ''))
+      .update(rawBody)
+      .digest('base64');
+
+    // Compare base64url (colons are used as padding in the header)
+    const actualValue = value.replace(/:/g, '').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const expectedValue = expectedHash.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+
+    const isValid = actualValue === expectedValue;
+    logger?.debug('content_digest_verification', { isValid });
+    return isValid;
+  } catch (err) {
+    logger?.error('content_digest_verification_error', err);
+    return false;
+  }
 }
 
 export type { PawapayClient };
