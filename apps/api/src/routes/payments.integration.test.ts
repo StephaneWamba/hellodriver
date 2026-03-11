@@ -87,20 +87,28 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
       try {
         const { wallets, users } = await import('@hellodriver/db');
 
-        // Insert users first — auth_id MUST match JWT sub claim
+        // Insert or update users — auth_id MUST match JWT sub claim
+        const { eq } = await import('drizzle-orm');
+
         await app.db.insert(users).values({
           id: clientUserId,
           auth_id: clientUserId,  // Links to JWT sub claim
           phone: '+24177777777',
           role: 'client',
-        }).onConflictDoNothing();
+        }).onConflictDoUpdate({
+          target: users.id,
+          set: { auth_id: clientUserId }
+        });
 
         await app.db.insert(users).values({
           id: driverUserId,
           auth_id: driverUserId,  // Links to JWT sub claim
           phone: '+24177777778',
           role: 'driver',
-        }).onConflictDoNothing();
+        }).onConflictDoUpdate({
+          target: users.id,
+          set: { auth_id: driverUserId }
+        });
 
         // Insert wallets
         await app.db
