@@ -85,7 +85,7 @@ jobs:
           pnpm --filter @hellodriver/db build
 
       - name: Run integration tests against production
-        run: pnpm --filter @hellodriver/api test -- --run payments
+        run: cd apps/api && npm test -- --run payments.integration.test.ts
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
