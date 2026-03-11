@@ -87,15 +87,17 @@ describe.skipIf(!hasRequiredEnv)('Payment Routes — Integration Tests', () => {
       try {
         const { wallets, users } = await import('@hellodriver/db');
 
-        // Insert users first
+        // Insert users first — auth_id MUST match JWT sub claim
         await app.db.insert(users).values({
           id: clientUserId,
+          auth_id: clientUserId,  // Links to JWT sub claim
           phone: '+24177777777',
           role: 'client',
         }).onConflictDoNothing();
 
         await app.db.insert(users).values({
           id: driverUserId,
+          auth_id: driverUserId,  // Links to JWT sub claim
           phone: '+24177777778',
           role: 'driver',
         }).onConflictDoNothing();
