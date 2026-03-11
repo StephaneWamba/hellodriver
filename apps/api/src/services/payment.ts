@@ -7,6 +7,13 @@ import type { PawapayOperator } from './pawapay.js';
 import crypto from 'crypto';
 
 /**
+ * Map PawapayOperator to payment_method enum value
+ */
+function mapOperatorToPaymentMethod(operator: PawapayOperator): string {
+  return operator === 'AIRTEL_GABON' ? 'airtel_money' : 'moov_money';
+}
+
+/**
  * Enforce daily operator limits (transaction amount, daily total, daily count)
  * Throws AppError.paymentFailed() if any limit exceeded
  */
@@ -31,6 +38,9 @@ export async function enforceOperatorLimits(
   const tomorrowStart = new Date(todayStart);
   tomorrowStart.setDate(tomorrowStart.getDate() + 1);
 
+  // Map operator to payment_method enum value
+  const paymentMethod = mapOperatorToPaymentMethod(operator);
+
   // Count today's payments with active status
   const todayPayments = await (db as any).execute(sql`
     SELECT
@@ -38,7 +48,7 @@ export async function enforceOperatorLimits(
       COUNT(*) as tx_count
     FROM payments
     WHERE user_id = ${userId}
-      AND operator = ${operator}
+      AND payment_method = ${paymentMethod}
       AND status IN ('pending_user_approval', 'processing', 'confirmed')
       AND created_at >= ${todayStart.toISOString()}
       AND created_at < ${tomorrowStart.toISOString()}
